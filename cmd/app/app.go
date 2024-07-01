@@ -30,6 +30,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = storage.Init(); err != nil {
+		log.Error("failed to init tables in storage", sl.Err(err))
+		os.Exit(1)
+	}
+
 	log.Info("connected to storage")
 
 	_ = storage
