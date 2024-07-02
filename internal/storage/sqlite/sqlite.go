@@ -103,7 +103,7 @@ func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 	posts := make([]types.Post, 0)
 	for rows.Next() {
 		var post types.Post
-		if err := rows.Scan(&post.ID, &post.Created_by, &post.Title, &post.Text, &post.Created_by, &post.Created_at); err != nil {
+		if err := rows.Scan(&post.ID, &post.Created_by, &post.Title, &post.Text, &post.Created_at, &post.Updated_at); err != nil {
 			return nil, fmt.Errorf("%s: failed to scan %s's posts: %w", fnGetPosts, created_by, err)
 		}
 		posts = append(posts, post)
