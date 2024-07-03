@@ -2,9 +2,14 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	config "github.com/solumD/go-blog-api/internal"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
+	mwLogger "github.com/solumD/go-blog-api/internal/http-server/middleware/logger"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	sqlite "github.com/solumD/go-blog-api/internal/storage/sqlite"
 )
@@ -37,7 +42,30 @@ func main() {
 
 	log.Info("connected to storage")
 
-	_ = storage
+	router := chi.NewRouter()
+
+	router.Use(middleware.RequestID)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
+
+	router.Post("/create", save.New(log, storage))
+
+	log.Info("starting server", slog.String("address", cfg.Address))
+
+	srv := &http.Server{
+		Addr:         cfg.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		log.Error("failed to start server")
+	}
+
+	log.Error("server stopped")
 }
 
 func InitLogger(env string) *slog.Logger {
