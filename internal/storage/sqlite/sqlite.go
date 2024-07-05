@@ -13,13 +13,14 @@ type Storage struct {
 }
 
 const (
-	fnNew         = "storage.sqlite.New"
-	fnSaveUser    = "storage.sqlite.SaveUser"
-	fnIsUserExist = "storage.sqlite.IsUserExist"
-	fnSavePost    = "storage.sqlite.SavePost"
-	fnGetPosts    = "storage.sqlite.GetPosts"
-	fnDeletePost  = "storage.sqlite.DeletePost"
-	fnInit        = "storage.sqlite.Init"
+	fnNew            = "storage.sqlite.New"
+	fnIsUserExist    = "storage.sqlite.IsUserExist"
+	fnSaveUser       = "storage.sqlite.SaveUser"
+	fnGetPostCreator = "storage.sqlite.GetPostCreator"
+	fnSavePost       = "storage.sqlite.SavePost"
+	fnGetPosts       = "storage.sqlite.GetPosts"
+	fnRemovePost     = "storage.sqlite.RemovePost"
+	fnInit           = "storage.sqlite.Init"
 )
 
 func New(path string) (*Storage, error) {
@@ -37,7 +38,7 @@ func New(path string) (*Storage, error) {
 }
 
 func (s *Storage) IsUserExist(login string) (bool, error) {
-	q := `SELECT COUNT(*) FROM users where login = ?`
+	q := `SELECT COUNT(*) FROM users WHERE login = ?`
 
 	var count int
 
@@ -65,6 +66,21 @@ func (s *Storage) SaveUser(login string, password string) (int64, error) {
 	}
 
 	return id, nil
+}
+
+func (s *Storage) GetPostCreator(id int) (string, error) {
+	q := `SELECT created_by FROM posts WHERE id = ?`
+
+	var created_by string
+
+	err := s.db.QueryRow(q, &id).Scan(&created_by)
+	if err == sql.ErrNoRows {
+		return "", err
+	} else if err != nil {
+		return "", fmt.Errorf("%s: failed to check if post exists: %w", fnGetPostCreator, err)
+	}
+
+	return created_by, nil
 }
 
 func (s *Storage) SavePost(created_by string, title string, text string, date_created string) (int64, error) {
@@ -115,11 +131,11 @@ func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 	return &UserPosts, nil
 }
 
-func (s *Storage) DeletePost(id int) error {
+func (s *Storage) RemovePost(id int) error {
 	query := `DELETE FROM posts WHERE id = ?`
 	_, err := s.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("%s: failed to delete post: %w", fnDeletePost, err)
+		return fmt.Errorf("%s: failed to delete post: %w", fnRemovePost, err)
 	}
 	return nil
 }

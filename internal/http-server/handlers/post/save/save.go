@@ -10,16 +10,16 @@ import (
 	"github.com/go-chi/render"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
-	"github.com/solumD/go-blog-api/internal/types"
 )
 
 type Request struct {
-	types.PostReq
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
 type Response struct {
 	resp.Response
-	ID int64
+	ID int64 `json:"id,omitempty"`
 }
 
 type PostSaver interface {
@@ -59,7 +59,7 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 			return
 		}
 
-		login := "TODO: получить логин из jwt токена"
+		login := "test"
 		date_created := time.Now().Format("2006-01-02 15:04:05")
 
 		id, err := postSaver.SavePost(login, req.Title, req.Text, date_created)
