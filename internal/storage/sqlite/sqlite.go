@@ -16,8 +16,8 @@ const (
 	fnNew            = "storage.sqlite.New"
 	fnIsUserExist    = "storage.sqlite.IsUserExist"
 	fnSaveUser       = "storage.sqlite.SaveUser"
-	fnGetPostCreator = "storage.sqlite.GetPostCreator"
 	fnSavePost       = "storage.sqlite.SavePost"
+	fnGetPostCreator = "storage.sqlite.GetPostCreator"
 	fnGetPosts       = "storage.sqlite.GetPosts"
 	fnRemovePost     = "storage.sqlite.RemovePost"
 	fnInit           = "storage.sqlite.Init"
@@ -68,25 +68,10 @@ func (s *Storage) SaveUser(login string, password string) (int64, error) {
 	return id, nil
 }
 
-func (s *Storage) GetPostCreator(id int) (string, error) {
-	q := `SELECT created_by FROM posts WHERE id = ?`
-
-	var created_by string
-
-	err := s.db.QueryRow(q, &id).Scan(&created_by)
-	if err == sql.ErrNoRows {
-		return "", err
-	} else if err != nil {
-		return "", fmt.Errorf("%s: failed to check if post exists: %w", fnGetPostCreator, err)
-	}
-
-	return created_by, nil
-}
-
 func (s *Storage) SavePost(created_by string, title string, text string, date_created string) (int64, error) {
 	q := `
-        INSERT INTO posts(created_by, title, text, date_created, date_updated) VALUES(?,?,?,?,?)
-    `
+        INSERT INTO posts(created_by, title, text, date_created, date_updated) VALUES(?,?,?,?,?)`
+
 	data := []any{created_by, title, text, date_created, date_created}
 
 	res, err := s.db.Exec(q, data...)
@@ -102,12 +87,27 @@ func (s *Storage) SavePost(created_by string, title string, text string, date_cr
 	return id, nil
 }
 
+func (s *Storage) GetPostCreator(id int) (string, error) {
+	q := `SELECT created_by FROM posts WHERE id = ?`
+
+	var created_by string
+
+	err := s.db.QueryRow(q, &id).Scan(&created_by)
+	if err == sql.ErrNoRows {
+		return "", err
+	} else if err != nil {
+		return "", fmt.Errorf("%s: failed to check if post exists: %w", fnGetPostCreator, err)
+	}
+
+	return created_by, nil
+}
+
 func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 	query := `
 		SELECT posts.id, created_by, title, text, date_created, date_updated FROM posts
 		JOIN users
 			ON users.login = posts.created_by
-			WHERE login = ?
+		WHERE created_by = ?
 		ORDER BY posts.id desc`
 
 	rows, err := s.db.Query(query, created_by)
@@ -133,6 +133,7 @@ func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 
 func (s *Storage) RemovePost(id int) error {
 	query := `DELETE FROM posts WHERE id = ?`
+
 	_, err := s.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("%s: failed to delete post: %w", fnRemovePost, err)
@@ -158,6 +159,7 @@ func (s *Storage) Init() error {
 			date_updated TIMESTAMP NOT NULL,
 			FOREIGN KEY(created_by) REFERENCES users(login) ON DELETE CASCADE);
 	`
+
 	_, err := s.db.Exec(q)
 	if err != nil {
 		return fmt.Errorf("%s: failed to init tables: %w", fnInit, err)

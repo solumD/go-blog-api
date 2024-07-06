@@ -2,7 +2,7 @@ package remove
 
 import (
 	"database/sql"
-	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -50,7 +50,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 
 		created_by, err := postRemover.GetPostCreator(req.ID)
 		if err == sql.ErrNoRows {
-			log.Error("post doesn't exist", sl.Err(err))
+			log.Error("invalid request", sl.Err(fmt.Errorf("post doesn't exist: %d", req.ID)))
 
 			render.JSON(w, r, resp.Error("post doesn't exist"))
 
@@ -65,7 +65,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 
 		login := "test"
 		if created_by != login {
-			log.Error("invalid request", sl.Err(errors.New("invalid user")))
+			log.Error("invalid request", sl.Err(fmt.Errorf("invalid user: %s", login)))
 
 			render.JSON(w, r, resp.Error("invalid user"))
 

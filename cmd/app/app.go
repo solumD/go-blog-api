@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	config "github.com/solumD/go-blog-api/internal"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
 	mwLogger "github.com/solumD/go-blog-api/internal/http-server/middleware/logger"
@@ -52,6 +53,7 @@ func main() {
 
 	router.Post("/create", save.New(log, storage))
 	router.Delete("/remove", remove.New(log, storage))
+	router.Get("/users/{login}", posts.New(log, storage))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 

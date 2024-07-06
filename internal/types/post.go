@@ -10,5 +10,5 @@ type Post struct {
 }
 
 type UsersPosts struct {
-	Posts []Post `json:"posts"`
+	Posts []Post `json:"posts,omitempty"`
 }
