@@ -12,18 +12,9 @@ type Storage struct {
 	db *sql.DB
 }
 
-const (
-	fnNew            = "storage.sqlite.New"
-	fnIsUserExist    = "storage.sqlite.IsUserExist"
-	fnSaveUser       = "storage.sqlite.SaveUser"
-	fnSavePost       = "storage.sqlite.SavePost"
-	fnGetPostCreator = "storage.sqlite.GetPostCreator"
-	fnGetPosts       = "storage.sqlite.GetPosts"
-	fnRemovePost     = "storage.sqlite.RemovePost"
-	fnInit           = "storage.sqlite.Init"
-)
-
 func New(path string) (*Storage, error) {
+	const fnNew = "storage.sqlite.New"
+
 	db, err := sql.Open("sqlite3", path)
 
 	if err != nil {
@@ -38,6 +29,8 @@ func New(path string) (*Storage, error) {
 }
 
 func (s *Storage) IsUserExist(login string) (bool, error) {
+	const fnIsUserExist = "storage.sqlite.IsUserExist"
+
 	q := `SELECT COUNT(*) FROM users WHERE login = ?`
 
 	var count int
@@ -50,6 +43,8 @@ func (s *Storage) IsUserExist(login string) (bool, error) {
 }
 
 func (s *Storage) SaveUser(login string, password string) (int64, error) {
+	const fnSaveUser = "storage.sqlite.SaveUser"
+
 	q := `
 		INSERT INTO users(login, password) VALUES(?, ?)
 	`
@@ -69,6 +64,8 @@ func (s *Storage) SaveUser(login string, password string) (int64, error) {
 }
 
 func (s *Storage) SavePost(created_by string, title string, text string, date_created string) (int64, error) {
+	const fnSavePost = "storage.sqlite.SavePost"
+
 	q := `
         INSERT INTO posts(created_by, title, text, date_created, date_updated) VALUES(?,?,?,?,?)`
 
@@ -88,6 +85,8 @@ func (s *Storage) SavePost(created_by string, title string, text string, date_cr
 }
 
 func (s *Storage) GetPostCreator(id int) (string, error) {
+	const fnGetPostCreator = "storage.sqlite.GetPostCreator"
+
 	q := `SELECT created_by FROM posts WHERE id = ?`
 
 	var created_by string
@@ -103,6 +102,8 @@ func (s *Storage) GetPostCreator(id int) (string, error) {
 }
 
 func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
+	const fnGetPosts = "storage.sqlite.GetPosts"
+
 	query := `
 		SELECT posts.id, created_by, title, text, date_created, date_updated FROM posts
 		JOIN users
@@ -125,23 +126,27 @@ func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 		posts = append(posts, post)
 	}
 
-	UserPosts := types.UsersPosts{}
-	UserPosts.Posts = posts
+	UserPosts := types.UsersPosts{Posts: posts}
 
 	return &UserPosts, nil
 }
 
 func (s *Storage) RemovePost(id int) error {
+	const fnRemovePost = "storage.sqlite.RemovePost"
+
 	query := `DELETE FROM posts WHERE id = ?`
 
 	_, err := s.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("%s: failed to delete post: %w", fnRemovePost, err)
 	}
+
 	return nil
 }
 
 func (s *Storage) Init() error {
+	const fnInit = "storage.sqlite.Init"
+
 	q := `
 		CREATE TABLE IF NOT EXISTS users(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,

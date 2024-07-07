@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -49,6 +50,8 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 			return
 		}
 
+		req.Title = strings.TrimSpace(req.Title)
+		req.Text = strings.TrimSpace(req.Title)
 		log.Info("request body decoded", slog.Any("request", req))
 
 		if len(req.Title) == 0 || len(req.Text) == 0 {
