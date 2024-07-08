@@ -7,6 +7,7 @@ require (
 	github.com/go-chi/render v1.0.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/mattn/go-sqlite3 v1.14.22
+	golang.org/x/crypto v0.25.0
 )
 
 require (

@@ -11,6 +11,8 @@ import (
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/register"
+	mwAuth "github.com/solumD/go-blog-api/internal/http-server/middleware/auth"
 	mwLogger "github.com/solumD/go-blog-api/internal/http-server/middleware/logger"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	sqlite "github.com/solumD/go-blog-api/internal/storage/sqlite"
@@ -46,14 +48,24 @@ func main() {
 
 	router := chi.NewRouter()
 
-	router.Use(middleware.RequestID)
 	router.Use(mwLogger.New(log))
+
+	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/create", save.New(log, storage))
-	router.Delete("/remove", remove.New(log, storage))
+	router.Route("/create", func(r chi.Router) {
+		r.Use(mwAuth.New(log))
+		r.Post("/", save.New(log, storage))
+	})
+
+	router.Route("/remove", func(r chi.Router) {
+		r.Use(mwAuth.New(log))
+		r.Delete("/", remove.New(log, storage))
+	})
+
 	router.Get("/users/{login}", posts.New(log, storage))
+	router.Post("/register", register.New(log, storage))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
