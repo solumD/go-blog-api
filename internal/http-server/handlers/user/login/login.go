@@ -26,7 +26,7 @@ type Response struct {
 
 type UserAuthorizer interface {
 	IsUserExist(login string) (bool, error)
-	GetUser(login string) (string, error)
+	GetPassword(login string) (string, error)
 }
 
 func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.HandlerFunc {
@@ -69,7 +69,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 			return
 		}
 
-		realPassword, err := userAuthorizer.GetUser(req.Login)
+		realPassword, err := userAuthorizer.GetPassword(req.Login)
 		if err != nil {
 			log.Error("failed to get user's real password", sl.Err(err))
 
@@ -90,7 +90,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err != nil {
 			log.Error("failed to generate jwt-token", sl.Err(err))
 
-			render.JSON(w, r, resp.Error("ffailed to generate jwt-token"))
+			render.JSON(w, r, resp.Error("failed to generate jwt-token"))
 
 			return
 		}

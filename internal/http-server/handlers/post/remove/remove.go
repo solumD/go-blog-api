@@ -25,7 +25,6 @@ type PostRemover interface {
 	RemovePost(id int) error
 }
 
-// TODO: получения логина пользователя из JWT-токена
 func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.save.Delete"
@@ -63,7 +62,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 			return
 		}
 
-		login := "test"
+		login := r.Header.Get("login")
 		if created_by != login {
 			log.Error("invalid request", sl.Err(fmt.Errorf("invalid user: %s", login)))
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	config "github.com/solumD/go-blog-api/internal"
+	config "github.com/solumD/go-blog-api/internal/config"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
@@ -55,19 +55,16 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Route("/create", func(r chi.Router) {
-		r.Use(mwAuth.New(log))
-		r.Post("/", save.New(log, storage))
-	})
-
-	router.Route("/remove", func(r chi.Router) {
-		r.Use(mwAuth.New(log))
-		r.Delete("/", remove.New(log, storage))
+	router.Route("/post", func(r chi.Router) {
+		r.Use(mwAuth.New(cfg.TokenSecret, log))
+		r.Post("/create", save.New(log, storage))
+		r.Delete("/delete", remove.New(log, storage))
 	})
 
 	router.Get("/users/{login}", posts.New(log, storage))
 	router.Post("/register", register.New(log, storage))
 	router.Post("/login", login.New(cfg.TokenSecret, log, storage))
+
 	log.Info("starting server", slog.String("address", cfg.Address))
 
 	srv := &http.Server{

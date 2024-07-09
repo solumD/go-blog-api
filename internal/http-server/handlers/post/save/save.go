@@ -27,9 +27,7 @@ type PostSaver interface {
 	SavePost(created_by string, title string, text string, date_created string) (int64, error)
 }
 
-// TODO: получение логина пользователя из JWT токена
 // TODO: добавить регулярку для проверки заголовка и текста поста (пробелы, длина и тд)
-
 func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.save.New"
@@ -62,7 +60,8 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 			return
 		}
 
-		login := "test"
+		login := r.Header.Get("login")
+
 		date_created := time.Now().Format("2006-01-02 15:04:05")
 
 		id, err := postSaver.SavePost(login, req.Title, req.Text, date_created)
