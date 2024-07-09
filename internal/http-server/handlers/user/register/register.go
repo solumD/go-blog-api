@@ -55,6 +55,14 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		req.Password = strings.TrimSpace(req.Password)
 		req.RepeatedPassword = strings.TrimSpace(req.RepeatedPassword)
 
+		if fields := strings.Fields(req.Login); len(fields) > 1 {
+			log.Error("invalid request", sl.Err(fmt.Errorf("login cannot contain spaces")))
+
+			render.JSON(w, r, resp.Error("login cannot contain spaces"))
+
+			return
+		}
+
 		exist, err := userRegistrar.IsUserExist(req.Login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))

@@ -14,6 +14,7 @@ func New(log *slog.Logger) func(next http.Handler) http.Handler {
 
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			log.Info("middleware auth used")
+
 			next.ServeHTTP(w, r)
 		}
 

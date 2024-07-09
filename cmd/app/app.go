@@ -11,6 +11,7 @@ import (
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/login"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/register"
 	mwAuth "github.com/solumD/go-blog-api/internal/http-server/middleware/auth"
 	mwLogger "github.com/solumD/go-blog-api/internal/http-server/middleware/logger"
@@ -66,7 +67,7 @@ func main() {
 
 	router.Get("/users/{login}", posts.New(log, storage))
 	router.Post("/register", register.New(log, storage))
-
+	router.Post("/login", login.New(cfg.TokenSecret, log, storage))
 	log.Info("starting server", slog.String("address", cfg.Address))
 
 	srv := &http.Server{

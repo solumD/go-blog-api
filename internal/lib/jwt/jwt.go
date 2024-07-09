@@ -1,0 +1,39 @@
+package jwt
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+func GenerateToken(login string, secret string) (string, error) {
+	payload := jwt.MapClaims{
+		"sub": login,
+		"exp": time.Now().Add(time.Hour * 4).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	signedToken, err := token.SignedString(secret)
+	if err != nil {
+		return "", err
+	}
+	return signedToken, nil
+}
+
+func DecodeJWTToken(secret, tokenString string) (jwt.MapClaims, error) {
+	signature := []byte(secret)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return signature, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		return nil, fmt.Errorf("wrong type of JWT token claims")
+	}
+
+}

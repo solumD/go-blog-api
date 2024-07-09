@@ -1,5 +1,6 @@
 env: "local" # local, dev, prod
 storage_path: "./storage/blog.db"
+token_secret: "golang is awesome"
 http_server: 
   address: "localhost:8081"
   timeout: 5s

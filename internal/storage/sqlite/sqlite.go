@@ -42,6 +42,26 @@ func (s *Storage) IsUserExist(login string) (bool, error) {
 	return count > 0, nil
 }
 
+func (s *Storage) GetUser(login string) (string, error) {
+	const fnGetUser = "storage.sqlite.GetUser"
+
+	query := `
+		SELECT password FROM users WHERE login = ?`
+
+	rows, err := s.db.Query(query, login)
+	if err != nil {
+		return "", fmt.Errorf("%s: failed to get user %s: %w", fnGetUser, login, err)
+	}
+	defer rows.Close()
+
+	var password string
+	if err := rows.Scan(&password); err != nil {
+		return "", fmt.Errorf("%s: failed to scan user %s: %w", fnGetUser, login, err)
+	}
+
+	return password, nil
+}
+
 func (s *Storage) SaveUser(login string, password string) (int64, error) {
 	const fnSaveUser = "storage.sqlite.SaveUser"
 
