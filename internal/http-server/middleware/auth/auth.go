@@ -33,6 +33,7 @@ func New(secret string, log *slog.Logger) func(next http.Handler) http.Handler {
 			if err != nil {
 				log.Error("invalid jwt token", sl.Err(err))
 
+				w.WriteHeader(http.StatusUnauthorized)
 				render.JSON(w, r, resp.Error(fmt.Sprintf("%v", err)))
 
 				return

@@ -49,7 +49,7 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 		}
 
 		req.Title = strings.TrimSpace(req.Title)
-		req.Text = strings.TrimSpace(req.Title)
+		req.Text = strings.TrimSpace(req.Text)
 		log.Info("request body decoded", slog.Any("request", req))
 
 		if len(req.Title) == 0 || len(req.Text) == 0 {

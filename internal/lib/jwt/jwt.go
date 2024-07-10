@@ -10,7 +10,7 @@ import (
 func GenerateToken(login string, secret string) (string, error) {
 	payload := jwt.MapClaims{
 		"sub": login,
-		"exp": time.Now().Add(time.Second * 4).Unix(),
+		"exp": time.Now().Add(time.Hour * 4).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
