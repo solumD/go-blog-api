@@ -117,7 +117,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to save user", sl.Err(err))
 
-			render.JSON(w, r, resp.Error("failed to esave user"))
+			render.JSON(w, r, resp.Error("failed to save user"))
 
 			return
 		}

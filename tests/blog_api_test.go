@@ -67,3 +67,64 @@ func TestRegisterLoginCreateDelete(t *testing.T) {
 		Expect().Status(200)
 
 }
+
+func TestRegisterUserAlreadyExists(t *testing.T) {
+	u := url.URL{
+		Scheme: "http",
+		Host:   host,
+	}
+
+	e := httpexpect.Default(t, u.String())
+
+	l := gofakeit.Username()
+	p := gofakeit.Password(true, true, true, false, false, 10)
+
+	e.POST("/register").
+		WithJSON(register.Request{
+			Login:            l,
+			Password:         p,
+			RepeatedPassword: p,
+		}).
+		Expect().Status(http.StatusOK)
+
+	r := e.POST("/register").
+		WithJSON(register.Request{
+			Login:            l,
+			Password:         p,
+			RepeatedPassword: p,
+		}).
+		Expect().Status(http.StatusOK).
+		JSON().Object().
+		ContainsKey("error")
+
+	expectedError := "user already exists"
+	r.Value("error").String().IsEqual(expectedError)
+}
+
+// TODO: написать тест-кейсы
+func TestRegisterAnotherCases(t *testing.T) {
+	testCases := []struct {
+		name             string
+		login            string
+		password         string
+		repeatedPassword string
+		id               string
+		error            string
+	}{
+		{},
+		{},
+		{},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			u := url.URL{
+				Scheme: "http",
+				Host:   host,
+			}
+
+			e := httpexpect.Default(t, u.String())
+
+		})
+	}
+}
