@@ -63,6 +63,14 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 			return
 		}
 
+		if len(req.Login) < 8 {
+			log.Error("invalid request", sl.Err(fmt.Errorf("login cannot be shorter than 8 characters")))
+
+			render.JSON(w, r, resp.Error("login cannot be shorter than 8 characters"))
+
+			return
+		}
+
 		exist, err := userRegistrar.IsUserExist(req.Login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
@@ -88,10 +96,26 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 			return
 		}
 
+		if len(req.RepeatedPassword) < 8 {
+			log.Error("invalid request", sl.Err(fmt.Errorf("repeated password cannot be shorter than 8 characters")))
+
+			render.JSON(w, r, resp.Error("repeated password cannot be shorter than 8 characters"))
+
+			return
+		}
+
 		if fields := strings.Fields(req.Password); len(fields) > 1 {
 			log.Error("invalid request", sl.Err(fmt.Errorf("password cannot contain spaces")))
 
 			render.JSON(w, r, resp.Error("password cannot contain spaces"))
+
+			return
+		}
+
+		if fields := strings.Fields(req.RepeatedPassword); len(fields) > 1 {
+			log.Error("invalid request", sl.Err(fmt.Errorf("repeated password cannot contain spaces")))
+
+			render.JSON(w, r, resp.Error("repeated password cannot contain spaces"))
 
 			return
 		}
