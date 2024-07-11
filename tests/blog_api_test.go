@@ -30,9 +30,8 @@ func TestRegisterLoginCreateDelete(t *testing.T) {
 
 	e.POST("/register").
 		WithJSON(register.Request{
-			Login:            l,
-			Password:         p,
-			RepeatedPassword: p,
+			Login:    l,
+			Password: p,
 		}).
 		Expect().Status(http.StatusOK)
 
@@ -81,17 +80,15 @@ func TestRegisterUserAlreadyExists(t *testing.T) {
 
 	e.POST("/register").
 		WithJSON(register.Request{
-			Login:            l,
-			Password:         p,
-			RepeatedPassword: p,
+			Login:    l,
+			Password: p,
 		}).
 		Expect().Status(http.StatusOK)
 
 	r := e.POST("/register").
 		WithJSON(register.Request{
-			Login:            l,
-			Password:         p,
-			RepeatedPassword: p,
+			Login:    l,
+			Password: p,
 		}).
 		Expect().Status(http.StatusOK).
 		JSON().Object().
@@ -102,18 +99,37 @@ func TestRegisterUserAlreadyExists(t *testing.T) {
 }
 
 // TODO: написать тест-кейсы
-func TestRegisterAnotherCases(t *testing.T) {
+func TestRegisterErrorsAnotherCases(t *testing.T) {
 	testCases := []struct {
-		name             string
-		login            string
-		password         string
-		repeatedPassword string
-		id               string
-		error            string
+		name     string
+		login    string
+		password string
+		error    string
 	}{
-		{},
-		{},
-		{},
+		{
+			name:     "Login with space",
+			login:    gofakeit.LetterN(3) + " " + gofakeit.Username(),
+			password: gofakeit.Password(true, true, true, false, false, 10),
+			error:    "login cannot contain spaces",
+		},
+		{
+			name:     "Short login",
+			login:    gofakeit.LetterN(7),
+			password: gofakeit.Password(true, true, true, false, false, 10),
+			error:    "login cannot be shorter than 8 characters",
+		},
+		{
+			name:     "Password with space",
+			login:    gofakeit.Username(),
+			password: gofakeit.LetterN(3) + " " + gofakeit.Password(true, true, true, false, false, 10),
+			error:    "password cannot contain spaces",
+		},
+		{
+			name:     "Short password",
+			login:    gofakeit.Username(),
+			password: gofakeit.Password(true, true, true, false, false, 7),
+			error:    "password cannot be shorter than 8 characters",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -125,6 +141,16 @@ func TestRegisterAnotherCases(t *testing.T) {
 
 			e := httpexpect.Default(t, u.String())
 
+			r := e.POST("/register").
+				WithJSON(register.Request{
+					Login:    tc.login,
+					Password: tc.password,
+				}).
+				Expect().Status(http.StatusOK).
+				JSON().Object().
+				ContainsKey("error")
+
+			r.Value("error").String().IsEqual(tc.error)
 		})
 	}
 }

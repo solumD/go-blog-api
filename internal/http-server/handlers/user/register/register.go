@@ -14,9 +14,8 @@ import (
 )
 
 type Request struct {
-	Login            string `json:"login"`
-	Password         string `json:"password"`
-	RepeatedPassword string `json:"repeated_password"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 type Response struct {
@@ -53,7 +52,6 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		log.Info("request body decoded", slog.Any("request", req))
 		req.Login = strings.TrimSpace(req.Login)
 		req.Password = strings.TrimSpace(req.Password)
-		req.RepeatedPassword = strings.TrimSpace(req.RepeatedPassword)
 
 		if fields := strings.Fields(req.Login); len(fields) > 1 {
 			log.Error("invalid request", sl.Err(fmt.Errorf("login cannot contain spaces")))
@@ -96,34 +94,10 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 			return
 		}
 
-		if len(req.RepeatedPassword) < 8 {
-			log.Error("invalid request", sl.Err(fmt.Errorf("repeated password cannot be shorter than 8 characters")))
-
-			render.JSON(w, r, resp.Error("repeated password cannot be shorter than 8 characters"))
-
-			return
-		}
-
 		if fields := strings.Fields(req.Password); len(fields) > 1 {
 			log.Error("invalid request", sl.Err(fmt.Errorf("password cannot contain spaces")))
 
 			render.JSON(w, r, resp.Error("password cannot contain spaces"))
-
-			return
-		}
-
-		if fields := strings.Fields(req.RepeatedPassword); len(fields) > 1 {
-			log.Error("invalid request", sl.Err(fmt.Errorf("repeated password cannot contain spaces")))
-
-			render.JSON(w, r, resp.Error("repeated password cannot contain spaces"))
-
-			return
-		}
-
-		if req.Password != req.RepeatedPassword {
-			log.Error("invalid request", sl.Err(fmt.Errorf("password and repeated password don't match")))
-
-			render.JSON(w, r, resp.Error("password and repeated password don't match"))
 
 			return
 		}
