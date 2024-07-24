@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// GenerateToken генерирует, подписывает и возвращает jwt-токен
 func GenerateToken(login string, secret string) (string, error) {
 	payload := jwt.MapClaims{
 		"sub": login,
@@ -22,6 +23,7 @@ func GenerateToken(login string, secret string) (string, error) {
 	return signedToken, nil
 }
 
+// GetTokenClaims читает jwt-токен и возвращает его payload
 func GetTokenClaims(secret, tokenString string) (jwt.MapClaims, error) {
 	signature := []byte(secret)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

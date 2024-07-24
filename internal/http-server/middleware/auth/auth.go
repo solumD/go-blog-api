@@ -16,7 +16,10 @@ type Response struct {
 	resp.Response
 }
 
-// написать логику для проверки jwt токена
+// Проверяет валидность jwt-токена из хэдера Authorization.
+// Если все ок, то добавляет к запросу хэдер Login, куда помещает логин пользователя
+// для будущих операций и направляет запрос на следующий хэндлер,
+// иначе - отвечает на запрос ошибкой.
 func New(secret string, log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		log := log.With(

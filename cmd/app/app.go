@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	config "github.com/solumD/go-blog-api/internal/config"
+	"github.com/solumD/go-blog-api/internal/config"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
