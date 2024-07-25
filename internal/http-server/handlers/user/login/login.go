@@ -12,6 +12,7 @@ import (
 	"github.com/solumD/go-blog-api/internal/lib/jwt"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	"github.com/solumD/go-blog-api/internal/lib/password"
+	"github.com/solumD/go-blog-api/internal/lib/validator"
 )
 
 type Request struct {
@@ -49,9 +50,19 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 			return
 		}
 
+		log.Info("request body decoded", slog.Any("request", req))
 		req.Login = strings.TrimSpace(req.Login)
 		req.Password = strings.TrimSpace(req.Password)
 
+		if err := validator.ValidateLogin(req.Login); err != nil {
+			log.Error("invalid request", sl.Err(err))
+
+			render.JSON(w, r, resp.Error(err.Error()))
+
+			return
+		}
+
+		// проверяем, существует ли пользователь с логином, переданным в запросе
 		exist, err := userAuthorizer.IsUserExist(req.Login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
@@ -69,6 +80,15 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 			return
 		}
 
+		if err := validator.ValidatePassword(req.Password); err != nil {
+			log.Error("invalid request", sl.Err(err))
+
+			render.JSON(w, r, resp.Error(err.Error()))
+
+			return
+		}
+
+		// получаем реальный пароль пользователя
 		realPassword, err := userAuthorizer.GetPassword(req.Login)
 		if err != nil {
 			log.Error("failed to get user's real password", sl.Err(err))
@@ -78,6 +98,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 			return
 		}
 
+		// сравниваем реальный пароль с тем, который был передан в теле запроса
 		if err := password.CompareHashAndPass(req.Password, realPassword); err != nil {
 			log.Error("invalid request", sl.Err(fmt.Errorf("invalid password")))
 

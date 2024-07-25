@@ -8,7 +8,6 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-// Структура конфига
 type Config struct {
 	Env         string `yaml:"env" env-default:"local" env-required:"true"`
 	TokenSecret string `yaml:"token_secret" env-required:"true"`
@@ -16,7 +15,6 @@ type Config struct {
 	HTTPServer  `yaml:"http_server"`
 }
 
-// Структура HTTP-сервера
 type HTTPServer struct {
 	Address     string        `yaml:"address" env-default:"localhost:8081"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`

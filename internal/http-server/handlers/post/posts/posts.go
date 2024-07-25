@@ -34,6 +34,7 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		// получаем логин пользователя из параметров запроса
 		login := strings.TrimSpace(chi.URLParam(r, "login"))
 
 		exist, err := postsGetter.IsUserExist(login)
@@ -52,6 +53,7 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 			return
 		}
 
+		// получаем посты пользователя
 		posts, err := postsGetter.GetPosts(login)
 		if err != nil {
 			log.Error("failed to get users's posts", sl.Err(err))
@@ -60,6 +62,8 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 
 			return
 		}
+
+		// у пользователя пока нет постов
 		if len(posts.Posts) == 0 {
 			log.Info("user hasn't posted something yet", slog.String("user", login))
 

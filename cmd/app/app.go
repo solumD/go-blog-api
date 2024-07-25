@@ -29,6 +29,7 @@ func main() {
 
 	cfg := config.MustLoad()
 
+	// инициализируем логгер
 	log := InitLogger(cfg.Env)
 
 	log.Info("starting blog-api", slog.String("env", cfg.Env))
@@ -40,6 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// инициализируем хранилище
 	if err = storage.Init(); err != nil {
 		log.Error("failed to init tables in storage", sl.Err(err))
 		os.Exit(1)
@@ -47,20 +49,25 @@ func main() {
 
 	log.Info("connected to storage")
 
+	// инициализируем роутер
 	router := chi.NewRouter()
 
+	// инициализируем middleware логгера
 	router.Use(mwLogger.New(log))
 
+	// иниализируем вспомогательные middleware
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
+	// обработчики, связанные с постами
 	router.Route("/post", func(r chi.Router) {
 		r.Use(mwAuth.New(cfg.TokenSecret, log))
 		r.Post("/create", save.New(log, storage))
 		r.Delete("/delete", remove.New(log, storage))
 	})
 
+	// обработчики, связанные с пользователями
 	router.Get("/users/{login}", posts.New(log, storage))
 	router.Post("/register", register.New(log, storage))
 	router.Post("/login", login.New(cfg.TokenSecret, log, storage))

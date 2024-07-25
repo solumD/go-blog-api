@@ -11,6 +11,7 @@ import (
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	"github.com/solumD/go-blog-api/internal/lib/password"
+	"github.com/solumD/go-blog-api/internal/lib/validator"
 )
 
 type Request struct {
@@ -28,7 +29,6 @@ type UserRegistrar interface {
 	SaveUser(login string, password string) (int64, error)
 }
 
-// TODO: добавить валидацию пароля (длина, содержание спецсимволов и тд) через регулярку
 func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.register.New"
@@ -42,7 +42,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
-			log.Error("failed to decode request body", sl.Err(err))
+			log.Error("failed to decode request", sl.Err(err))
 
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
@@ -53,22 +53,15 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		req.Login = strings.TrimSpace(req.Login)
 		req.Password = strings.TrimSpace(req.Password)
 
-		if fields := strings.Fields(req.Login); len(fields) > 1 {
-			log.Error("invalid request", sl.Err(fmt.Errorf("login cannot contain spaces")))
+		if err := validator.ValidateLogin(req.Login); err != nil {
+			log.Error("invalid request", sl.Err(err))
 
-			render.JSON(w, r, resp.Error("login cannot contain spaces"))
-
-			return
-		}
-
-		if len(req.Login) < 8 {
-			log.Error("invalid request", sl.Err(fmt.Errorf("login cannot be shorter than 8 characters")))
-
-			render.JSON(w, r, resp.Error("login cannot be shorter than 8 characters"))
+			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
 		}
 
+		// проверяем, существует ли пользователь с логином, переданным в запросе
 		exist, err := userRegistrar.IsUserExist(req.Login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
@@ -86,18 +79,10 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 			return
 		}
 
-		if len(req.Password) < 8 {
-			log.Error("invalid request", sl.Err(fmt.Errorf("password cannot be shorter than 8 characters")))
+		if err := validator.ValidatePassword(req.Password); err != nil {
+			log.Error("invalid request", sl.Err(err))
 
-			render.JSON(w, r, resp.Error("password cannot be shorter than 8 characters"))
-
-			return
-		}
-
-		if fields := strings.Fields(req.Password); len(fields) > 1 {
-			log.Error("invalid request", sl.Err(fmt.Errorf("password cannot contain spaces")))
-
-			render.JSON(w, r, resp.Error("password cannot contain spaces"))
+			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
 		}
