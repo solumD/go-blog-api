@@ -1,5 +1,7 @@
 ﻿# go-blog-api
-Небольшое API блога. Пользователи могут добавлять и удалять посты. Также есть возможность посмотреть посты конкретного пользователя.
+[English](https://github.com/solumD/go-blog-api/edit/main/README.md#packages-and-technologies-used)
+___
+Небольшое API блога. Пользователи могут добавлять и удалять посты. Также есть возможность увидеть посты конкретного пользователя.
 ## Использованные пакеты и технологии
 Роутер - [chi](https://github.com/go-chi/chi/);
 
@@ -9,18 +11,30 @@
 
 JWT-аутентификация;
 
-Написан DOCKERFILE для запуска в контейнере.
+Написан DOCKERFILE.
 
 ___
+A small API of a blog. Users can add and delete posts. It is also possible to get the posts of a particular user.
+## Packages and technologies used
+Router - [chi](https://github.com/go-chi/chi/);
 
-## Демонстрация эндпоинтов
+Logger - [slog](https://pkg.go.dev/golang.org/x/exp/slog);
 
-#### /register - регистрация пользователя
+Storage - [sqlite3](https://www.sqlite.org/) (it is possible to use any database you want, if you implement the interfaces used in the handlers);
 
-#### /login - авторизация пользователя
+JWT authentication;
 
-#### /users/{login} - получить все посты конкретного пользователя
+DOCKERFILE is written.
+___
 
-#### /post/create - создать пост
+## Демонстрация эндпоинтов (Demonstration of endpoints)
 
-#### /post/delete - удалить пост
+#### /register - регистрация пользователя (user registration)
+
+#### /login - авторизация пользователя (user authorisation)
+
+#### /users/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
+
+#### /post/create - создать пост (create a post)
+
+#### /post/delete - удалить пост (delete a post)
