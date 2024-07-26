@@ -1,6 +1,7 @@
 ﻿# go-blog-api
 [English](#english)
 ___
+## RUS
 Небольшое API блога. Пользователи могут добавлять и удалять посты. Также есть возможность увидеть посты конкретного пользователя.
 ## Использованные пакеты и технологии
 Роутер - [chi](https://github.com/go-chi/chi/);
@@ -14,7 +15,7 @@ JWT-аутентификация;
 Написан DOCKERFILE.
 
 ___
-<a name="english"></a> 
+## ENG <a name="english"></a> 
 A small API of a blog. Users can add and delete posts. It is also possible to get the posts of a particular user.
 ## Packages and technologies used
 Router - [chi](https://github.com/go-chi/chi/);
