@@ -1,5 +1,5 @@
 ﻿# go-blog-api
-[English](https://github.com/solumD/go-blog-api/edit/main/README.md#packages-and-technologies-used)
+[English](#english)
 ___
 Небольшое API блога. Пользователи могут добавлять и удалять посты. Также есть возможность увидеть посты конкретного пользователя.
 ## Использованные пакеты и технологии
@@ -14,6 +14,7 @@ JWT-аутентификация;
 Написан DOCKERFILE.
 
 ___
+<a name="english"></a> 
 A small API of a blog. Users can add and delete posts. It is also possible to get the posts of a particular user.
 ## Packages and technologies used
 Router - [chi](https://github.com/go-chi/chi/);
