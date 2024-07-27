@@ -7,6 +7,7 @@
 ___
 ### RUS <a name="russian"></a> 
 Небольшое API блога. Пользователи могут добавлять и удалять посты. Также есть возможность увидеть посты конкретного пользователя.
+В данный момент пишу функциональные тесты.
 ## Использованные пакеты и технологии
 Роутер - [chi](https://github.com/go-chi/chi/);
 
@@ -16,11 +17,14 @@ ___
 
 JWT-аутентификация;
 
-Написан DOCKERFILE.
+Написан DOCKERFILE;
+
+Тестирование - стандартная библиотека и пакет [httpexpect](https://github.com/gavv/httpexpect).
 
 ___
 ### ENG <a name="english"></a> 
 A small API of a blog. Users can add and delete posts. It is also possible to get the posts of a particular user.
+Currently I'm writing functional tests.
 ## Packages and technologies used
 Router - [chi](https://github.com/go-chi/chi/);
 
@@ -30,7 +34,9 @@ Storage - [sqlite3](https://www.sqlite.org/) (it is possible to use any database
 
 JWT authentication;
 
-DOCKERFILE is written.
+DOCKERFILE is written;
+
+Testing - standart library and [httpexpect](https://github.com/gavv/httpexpect).
 ___
 
 ## Демонстрация эндпоинтов (Demonstration of endpoints) <a name="demo"></a> 
