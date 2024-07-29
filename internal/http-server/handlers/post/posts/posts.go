@@ -41,6 +41,7 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to check if user exists"))
 
 			return
@@ -48,6 +49,7 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 		if !exist {
 			log.Error("invalid request", sl.Err(fmt.Errorf("user doesn't exist: %s", login)))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("user doesn't exist"))
 
 			return
@@ -58,6 +60,7 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to get users's posts", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to get users's posts"))
 
 			return

@@ -44,6 +44,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to decode request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
 			return
@@ -56,6 +57,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err := validator.ValidateLogin(req.Login); err != nil {
 			log.Error("invalid request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
@@ -66,6 +68,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to check if user exists"))
 
 			return
@@ -74,6 +77,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if exist {
 			log.Error("invalid request", sl.Err(fmt.Errorf("user already exists")))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("user already exists"))
 
 			return
@@ -82,6 +86,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err := validator.ValidatePassword(req.Password); err != nil {
 			log.Error("invalid request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
@@ -91,6 +96,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to encrypt password", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to encrypt password"))
 
 			return
@@ -100,6 +106,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to save user", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to save user"))
 
 			return

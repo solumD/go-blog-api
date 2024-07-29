@@ -40,6 +40,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to decode request body", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
 			return
@@ -51,12 +52,14 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 		if err == sql.ErrNoRows {
 			log.Error("invalid request", sl.Err(fmt.Errorf("post doesn't exist: %d", req.ID)))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("post doesn't exist"))
 
 			return
 		} else if err != nil {
 			log.Error("failed to check if post exists", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to check if post exists"))
 
 			return
@@ -66,6 +69,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 		if created_by != login {
 			log.Error("invalid request", sl.Err(fmt.Errorf("invalid user: %s", login)))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("invalid user"))
 
 			return
@@ -75,6 +79,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to remove post", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to remove post"))
 
 			return

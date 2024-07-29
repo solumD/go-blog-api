@@ -11,14 +11,14 @@ const (
 	StatusError = "Error"
 )
 
-// OK возвращает ответ для случая с успешным выполнением
+// OK возвращает ответ для запроса с успешным выполнением
 func OK() Response {
 	return Response{
 		Status: StatusOK,
 	}
 }
 
-// Error возвращает ответ для случая с ошибкой
+// Error возвращает ответ для запроса с ошибкой
 func Error(msg string) Response {
 	return Response{
 		Status: StatusError,

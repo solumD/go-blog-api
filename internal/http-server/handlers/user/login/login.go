@@ -45,6 +45,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err != nil {
 			log.Error("failed to decode request body", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
 			return
@@ -57,6 +58,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err := validator.ValidateLogin(req.Login); err != nil {
 			log.Error("invalid request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
@@ -67,6 +69,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to check if user exists"))
 
 			return
@@ -75,6 +78,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if !exist {
 			log.Error("invalid request", sl.Err(fmt.Errorf("user does not exist")))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("user does not exist"))
 
 			return
@@ -83,6 +87,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err := validator.ValidatePassword(req.Password); err != nil {
 			log.Error("invalid request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
@@ -93,6 +98,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err != nil {
 			log.Error("failed to get user's real password", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to get user's real password"))
 
 			return
@@ -102,6 +108,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err := password.CompareHashAndPass(req.Password, realPassword); err != nil {
 			log.Error("invalid request", sl.Err(fmt.Errorf("invalid password")))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("invalid password"))
 
 			return
@@ -111,6 +118,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		if err != nil {
 			log.Error("failed to generate jwt-token", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to generate jwt-token"))
 
 			return

@@ -27,7 +27,6 @@ type PostSaver interface {
 	SavePost(created_by string, title string, text string, date_created string) (int64, error)
 }
 
-// TODO: добавить регулярку для проверки заголовка и текста поста (пробелы, длина и тд)
 func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.save.New"
@@ -43,6 +42,7 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to decode request body", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
 			return
@@ -55,6 +55,7 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 		if len(req.Title) == 0 || len(req.Text) == 0 {
 			log.Error("invalid request", sl.Err(errors.New("post's title and text can't be empty")))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("post's title and text can't be empty"))
 
 			return
@@ -68,6 +69,7 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to create post", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to create post"))
 
 			return

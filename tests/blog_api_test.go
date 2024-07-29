@@ -90,7 +90,7 @@ func TestRegisterUserAlreadyExists(t *testing.T) {
 			Login:    l,
 			Password: p,
 		}).
-		Expect().Status(http.StatusOK).
+		Expect().Status(http.StatusBadRequest).
 		JSON().Object().
 		ContainsKey("error")
 
@@ -99,7 +99,7 @@ func TestRegisterUserAlreadyExists(t *testing.T) {
 }
 
 // TODO: написать тест-кейсы
-func TestRegisterErrorsAnotherCases(t *testing.T) {
+func TestRegisterInvalidLoginOrPassword(t *testing.T) {
 	testCases := []struct {
 		name     string
 		login    string
@@ -146,7 +146,7 @@ func TestRegisterErrorsAnotherCases(t *testing.T) {
 					Login:    tc.login,
 					Password: tc.password,
 				}).
-				Expect().Status(http.StatusOK).
+				Expect().Status(http.StatusBadRequest).
 				JSON().Object().
 				ContainsKey("error")
 
