@@ -15,7 +15,9 @@ ___
 
 Хранилище - [sqlite3](https://www.sqlite.org/) (при желании можно использовать любую базу данных, если реализовать используемые в хэндлерах интерфейсы);
 
-JWT-аутентификация;
+Хэширование пароля - [bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt);
+
+JWT-аутентификация - [jwt-go](https://pkg.go.dev/github.com/golang-jwt/jwt/v5);
 
 Написан DOCKERFILE;
 
@@ -32,7 +34,9 @@ Logger - [slog](https://pkg.go.dev/golang.org/x/exp/slog);
 
 Storage - [sqlite3](https://www.sqlite.org/) (it is possible to use any database you want, if you implement the interfaces used in the handlers);
 
-JWT authentication;
+Password hashing - [bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt);
+
+JWT authentication - [jwt-go](https://pkg.go.dev/github.com/golang-jwt/jwt/v5);
 
 DOCKERFILE is written;
 
