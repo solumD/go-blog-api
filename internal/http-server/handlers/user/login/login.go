@@ -1,10 +1,12 @@
 package login
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -26,11 +28,11 @@ type Response struct {
 }
 
 type UserAuthorizer interface {
-	IsUserExist(login string) (bool, error)
-	GetPassword(login string) (string, error)
+	IsUserExist(ctx context.Context, login string) (bool, error)
+	GetPassword(ctx context.Context, login string) (string, error)
 }
 
-func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.HandlerFunc {
+func New(ctx context.Context, secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.login.New"
 
@@ -38,6 +40,9 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 			slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
 
 		var req Request
 
@@ -65,7 +70,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		}
 
 		// проверяем, существует ли пользователь с логином, переданным в запросе
-		exist, err := userAuthorizer.IsUserExist(req.Login)
+		exist, err := userAuthorizer.IsUserExist(ctx, req.Login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
 
@@ -94,7 +99,7 @@ func New(secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.Ha
 		}
 
 		// получаем реальный пароль пользователя
-		realPassword, err := userAuthorizer.GetPassword(req.Login)
+		realPassword, err := userAuthorizer.GetPassword(ctx, req.Login)
 		if err != nil {
 			log.Error("failed to get user's real password", sl.Err(err))
 

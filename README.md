@@ -49,7 +49,7 @@ ___
 
 #### /login - авторизация пользователя (user authorisation)
 
-#### /users/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
+#### /user/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
 
 #### /post/create - создать пост (create a post)
 

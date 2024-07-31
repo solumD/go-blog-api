@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -28,25 +29,25 @@ func New(path string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) IsUserExist(login string) (bool, error) {
+func (s *Storage) IsUserExist(ctx context.Context, login string) (bool, error) {
 	const fnIsUserExist = "storage.sqlite.IsUserExist"
 
 	q := `SELECT COUNT(*) FROM users WHERE login = ?`
 
 	var count int
 
-	if err := s.db.QueryRow(q, &login).Scan(&count); err != nil {
+	if err := s.db.QueryRowContext(ctx, q, &login).Scan(&count); err != nil {
 		return false, fmt.Errorf("%s: failed to check if user exists: %w", fnIsUserExist, err)
 	}
 
 	return count > 0, nil
 }
 
-func (s *Storage) GetPassword(login string) (string, error) {
+func (s *Storage) GetPassword(ctx context.Context, login string) (string, error) {
 	const fnGetPassword = "storage.sqlite.GetUserPassword"
 
 	query := `SELECT password FROM users where login = ?`
-	row := s.db.QueryRow(query, login)
+	row := s.db.QueryRowContext(ctx, query, login)
 
 	var password string
 
@@ -57,7 +58,7 @@ func (s *Storage) GetPassword(login string) (string, error) {
 	return password, nil
 }
 
-func (s *Storage) SaveUser(login string, password string) (int64, error) {
+func (s *Storage) SaveUser(ctx context.Context, login string, password string) (int64, error) {
 	const fnSaveUser = "storage.sqlite.SaveUser"
 
 	q := `
@@ -65,7 +66,7 @@ func (s *Storage) SaveUser(login string, password string) (int64, error) {
 	`
 	data := []any{login, password}
 
-	res, err := s.db.Exec(q, data...)
+	res, err := s.db.ExecContext(ctx, q, data...)
 	if err != nil {
 		return 0, fmt.Errorf("%s: failed to save user: %w", fnSaveUser, err)
 	}
@@ -78,7 +79,7 @@ func (s *Storage) SaveUser(login string, password string) (int64, error) {
 	return id, nil
 }
 
-func (s *Storage) SavePost(created_by string, title string, text string, date_created string) (int64, error) {
+func (s *Storage) SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error) {
 	const fnSavePost = "storage.sqlite.SavePost"
 
 	q := `
@@ -86,7 +87,7 @@ func (s *Storage) SavePost(created_by string, title string, text string, date_cr
 
 	data := []any{created_by, title, text, date_created, date_created}
 
-	res, err := s.db.Exec(q, data...)
+	res, err := s.db.ExecContext(ctx, q, data...)
 	if err != nil {
 		return 0, fmt.Errorf("%s: failed to save post: %w", fnSavePost, err)
 	}
@@ -99,14 +100,14 @@ func (s *Storage) SavePost(created_by string, title string, text string, date_cr
 	return id, nil
 }
 
-func (s *Storage) GetPostCreator(id int) (string, error) {
+func (s *Storage) GetPostCreator(ctx context.Context, id int) (string, error) {
 	const fnGetPostCreator = "storage.sqlite.GetPostCreator"
 
 	q := `SELECT created_by FROM posts WHERE id = ?`
 
 	var created_by string
 
-	err := s.db.QueryRow(q, &id).Scan(&created_by)
+	err := s.db.QueryRowContext(ctx, q, &id).Scan(&created_by)
 	if err == sql.ErrNoRows {
 		return "", err
 	} else if err != nil {
@@ -116,7 +117,7 @@ func (s *Storage) GetPostCreator(id int) (string, error) {
 	return created_by, nil
 }
 
-func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
+func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error) {
 	const fnGetPosts = "storage.sqlite.GetPosts"
 
 	query := `
@@ -126,7 +127,7 @@ func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 		WHERE created_by = ?
 		ORDER BY posts.id desc`
 
-	rows, err := s.db.Query(query, created_by)
+	rows, err := s.db.QueryContext(ctx, query, created_by)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to get %s's posts: %w", fnGetPosts, created_by, err)
 	}
@@ -146,12 +147,12 @@ func (s *Storage) GetPosts(created_by string) (*types.UsersPosts, error) {
 	return &UserPosts, nil
 }
 
-func (s *Storage) RemovePost(id int) error {
+func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	const fnRemovePost = "storage.sqlite.RemovePost"
 
 	query := `DELETE FROM posts WHERE id = ?`
 
-	_, err := s.db.Exec(query, id)
+	_, err := s.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("%s: failed to delete post: %w", fnRemovePost, err)
 	}
@@ -159,7 +160,7 @@ func (s *Storage) RemovePost(id int) error {
 	return nil
 }
 
-func (s *Storage) Init() error {
+func (s *Storage) Init(ctx context.Context) error {
 	const fnInit = "storage.sqlite.Init"
 
 	q := `
@@ -180,7 +181,7 @@ func (s *Storage) Init() error {
 			FOREIGN KEY(created_by) REFERENCES users(login) ON DELETE CASCADE);
 	`
 
-	_, err := s.db.Exec(q)
+	_, err := s.db.ExecContext(ctx, q)
 	if err != nil {
 		return fmt.Errorf("%s: failed to init tables: %w", fnInit, err)
 	}

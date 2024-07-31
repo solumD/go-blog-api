@@ -1,10 +1,12 @@
 package posts
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,11 +23,11 @@ type Response struct {
 }
 
 type PostsGetter interface {
-	IsUserExist(login string) (bool, error)
-	GetPosts(created_by string) (*types.UsersPosts, error)
+	IsUserExist(ctx context.Context, login string) (bool, error)
+	GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error)
 }
 
-func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.posts.New"
 
@@ -34,10 +36,13 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
 		// получаем логин пользователя из параметров запроса
 		login := strings.TrimSpace(chi.URLParam(r, "login"))
 
-		exist, err := postsGetter.IsUserExist(login)
+		exist, err := postsGetter.IsUserExist(ctx, login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
 
@@ -56,7 +61,7 @@ func New(log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 		}
 
 		// получаем посты пользователя
-		posts, err := postsGetter.GetPosts(login)
+		posts, err := postsGetter.GetPosts(ctx, login)
 		if err != nil {
 			log.Error("failed to get users's posts", sl.Err(err))
 

@@ -1,6 +1,7 @@
 package save
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -24,10 +25,10 @@ type Response struct {
 }
 
 type PostSaver interface {
-	SavePost(created_by string, title string, text string, date_created string) (int64, error)
+	SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error)
 }
 
-func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.save.New"
 
@@ -35,6 +36,9 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 			slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
 
 		var req Request
 
@@ -65,7 +69,7 @@ func New(log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 
 		date_created := time.Now().Format("2006-01-02 15:04:05")
 
-		id, err := postSaver.SavePost(login, req.Title, req.Text, date_created)
+		id, err := postSaver.SavePost(ctx, login, req.Title, req.Text, date_created)
 		if err != nil {
 			log.Error("failed to create post", sl.Err(err))
 

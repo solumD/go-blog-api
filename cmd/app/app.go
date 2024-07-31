@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	// инициализируем хранилище
-	if err = storage.Init(); err != nil {
+	if err = storage.Init(context.TODO()); err != nil {
 		log.Error("failed to init tables in storage", sl.Err(err))
 		os.Exit(1)
 	}
@@ -63,14 +64,14 @@ func main() {
 	// обработчики, связанные с постами
 	router.Route("/post", func(r chi.Router) {
 		r.Use(mwAuth.New(cfg.TokenSecret, log))
-		r.Post("/create", save.New(log, storage))
-		r.Delete("/delete", remove.New(log, storage))
+		r.Post("/create", save.New(context.Background(), log, storage))
+		r.Delete("/delete", remove.New(context.Background(), log, storage))
 	})
 
 	// обработчики, связанные с пользователями
-	router.Get("/users/{login}", posts.New(log, storage))
-	router.Post("/register", register.New(log, storage))
-	router.Post("/login", login.New(cfg.TokenSecret, log, storage))
+	router.Get("/user/{login}", posts.New(context.Background(), log, storage))
+	router.Post("/register", register.New(context.Background(), log, storage))
+	router.Post("/login", login.New(context.Background(), cfg.TokenSecret, log, storage))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 

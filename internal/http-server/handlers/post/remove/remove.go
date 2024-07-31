@@ -1,10 +1,12 @@
 package remove
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -21,11 +23,11 @@ type Response struct {
 }
 
 type PostRemover interface {
-	GetPostCreator(id int) (string, error)
-	RemovePost(id int) error
+	GetPostCreator(ctx context.Context, id int) (string, error)
+	RemovePost(ctx context.Context, id int) error
 }
 
-func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.save.Delete"
 
@@ -33,6 +35,9 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 			slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
 
 		var req Request
 
@@ -48,7 +53,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 
 		log.Info("request body decoded", slog.Any("request", req))
 
-		created_by, err := postRemover.GetPostCreator(req.ID)
+		created_by, err := postRemover.GetPostCreator(ctx, req.ID)
 		if err == sql.ErrNoRows {
 			log.Error("invalid request", sl.Err(fmt.Errorf("post doesn't exist: %d", req.ID)))
 
@@ -75,7 +80,7 @@ func New(log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 			return
 		}
 
-		err = postRemover.RemovePost(req.ID)
+		err = postRemover.RemovePost(ctx, req.ID)
 		if err != nil {
 			log.Error("failed to remove post", sl.Err(err))
 

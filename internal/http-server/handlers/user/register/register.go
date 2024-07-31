@@ -1,10 +1,12 @@
 package register
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -25,11 +27,11 @@ type Response struct {
 }
 
 type UserRegistrar interface {
-	IsUserExist(login string) (bool, error)
-	SaveUser(login string, password string) (int64, error)
+	IsUserExist(ctx context.Context, login string) (bool, error)
+	SaveUser(ctx context.Context, login string, password string) (int64, error)
 }
 
-func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.register.New"
 
@@ -37,6 +39,9 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 			slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
+
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
 
 		var req Request
 
@@ -64,7 +69,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 		}
 
 		// проверяем, существует ли пользователь с логином, переданным в запросе
-		exist, err := userRegistrar.IsUserExist(req.Login)
+		exist, err := userRegistrar.IsUserExist(ctx, req.Login)
 		if err != nil {
 			log.Error("failed to check if user exists", sl.Err(err))
 
@@ -102,7 +107,7 @@ func New(log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 			return
 		}
 
-		id, err := userRegistrar.SaveUser(req.Login, hashedPassword)
+		id, err := userRegistrar.SaveUser(ctx, req.Login, hashedPassword)
 		if err != nil {
 			log.Error("failed to save user", sl.Err(err))
 
