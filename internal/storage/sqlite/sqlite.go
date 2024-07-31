@@ -13,6 +13,7 @@ type Storage struct {
 	db *sql.DB
 }
 
+// New создает новое sqlite хранилище
 func New(path string) (*Storage, error) {
 	const fnNew = "storage.sqlite.New"
 
@@ -29,6 +30,7 @@ func New(path string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
+// IsUserExist проверяет, есть ли в БД пользователь с указанным логином
 func (s *Storage) IsUserExist(ctx context.Context, login string) (bool, error) {
 	const fnIsUserExist = "storage.sqlite.IsUserExist"
 
@@ -43,6 +45,7 @@ func (s *Storage) IsUserExist(ctx context.Context, login string) (bool, error) {
 	return count > 0, nil
 }
 
+// GetPassword получает пароль конкретного пользователя
 func (s *Storage) GetPassword(ctx context.Context, login string) (string, error) {
 	const fnGetPassword = "storage.sqlite.GetUserPassword"
 
@@ -58,6 +61,7 @@ func (s *Storage) GetPassword(ctx context.Context, login string) (string, error)
 	return password, nil
 }
 
+// SaveUser сохраняет пользователя и его зашифрованный пароль
 func (s *Storage) SaveUser(ctx context.Context, login string, password string) (int64, error) {
 	const fnSaveUser = "storage.sqlite.SaveUser"
 
@@ -79,6 +83,7 @@ func (s *Storage) SaveUser(ctx context.Context, login string, password string) (
 	return id, nil
 }
 
+// SavePost сохраняет пост пользователя
 func (s *Storage) SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error) {
 	const fnSavePost = "storage.sqlite.SavePost"
 
@@ -100,6 +105,7 @@ func (s *Storage) SavePost(ctx context.Context, created_by string, title string,
 	return id, nil
 }
 
+// GetPostCreator получает id создателя поста
 func (s *Storage) GetPostCreator(ctx context.Context, id int) (string, error) {
 	const fnGetPostCreator = "storage.sqlite.GetPostCreator"
 
@@ -117,6 +123,7 @@ func (s *Storage) GetPostCreator(ctx context.Context, id int) (string, error) {
 	return created_by, nil
 }
 
+// GetPosts получает посты конкретного пользователя
 func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error) {
 	const fnGetPosts = "storage.sqlite.GetPosts"
 
@@ -147,6 +154,7 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	return &UserPosts, nil
 }
 
+// RemovePost удаляет пост
 func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	const fnRemovePost = "storage.sqlite.RemovePost"
 
@@ -160,6 +168,7 @@ func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	return nil
 }
 
+// Init создает таблицы и индексы, если они еще не были созданы
 func (s *Storage) Init(ctx context.Context) error {
 	const fnInit = "storage.sqlite.Init"
 
