@@ -6,7 +6,7 @@
 [Демонстрация эндпоинтов (Demonstration of endpoints)](#demo)
 ___
 ### RUS <a name="russian"></a> 
-Небольшое API блога. Пользователи могут добавлять и удалять посты. Также есть возможность увидеть посты конкретного пользователя.
+Небольшое API блога. Пользователи могут добавлять, редактировать и удалять посты. Также есть возможность увидеть посты конкретного пользователя.
 В данный момент пишу функциональные тесты.
 ## Использованные пакеты и технологии
 Роутер - [chi](https://github.com/go-chi/chi/);
@@ -25,7 +25,7 @@ JWT-аутентификация - [jwt-go](https://pkg.go.dev/github.com/golang
 
 ___
 ### ENG <a name="english"></a> 
-A small API of a blog. Users can add and delete posts. It is also possible to get the posts of a particular user.
+A small API of a blog. Users can add, update and delete posts. It is also possible to get the posts of a particular user.
 Currently I'm writing functional tests.
 ## Packages and technologies used
 Router - [chi](https://github.com/go-chi/chi/);
@@ -52,5 +52,7 @@ ___
 #### /user/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
 
 #### /post/create - создать пост (create a post)
+
+#### /post/update - обновить название или текст поста (update post's title or text)
 
 #### /post/delete - удалить пост (delete a post)
