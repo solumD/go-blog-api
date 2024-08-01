@@ -5,6 +5,7 @@ type Post struct {
 	Created_by string `json:"created_by"`
 	Title      string `json:"title"`
 	Text       string `json:"text"`
+	Likes      int    `json:"likes"`
 	Created_at string `json:"created_at"`
 	Updated_at string `json:"updated_at"`
 }

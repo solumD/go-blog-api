@@ -9,9 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/solumD/go-blog-api/internal/config"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/like"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/unlike"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/update"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/login"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/register"
@@ -68,6 +70,8 @@ func main() {
 		r.Post("/create", save.New(context.Background(), log, storage))
 		r.Delete("/delete", remove.New(context.Background(), log, storage))
 		r.Patch("/update", update.New(context.Background(), log, storage))
+		r.Put("/like", like.New(context.Background(), log, storage))
+		r.Put("/unlike", unlike.New(context.Background(), log, storage))
 	})
 
 	// обработчики, связанные с пользователями

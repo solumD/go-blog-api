@@ -28,7 +28,7 @@ type Response struct {
 
 type UserRegistrar interface {
 	IsUserExist(ctx context.Context, login string) (bool, error)
-	SaveUser(ctx context.Context, login string, password string) (int64, error)
+	SaveUser(ctx context.Context, login string, password string, date_created string) (int64, error)
 }
 
 func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
@@ -107,7 +107,9 @@ func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) htt
 			return
 		}
 
-		id, err := userRegistrar.SaveUser(ctx, req.Login, hashedPassword)
+		date_registered := time.Now().Format("2006-01-02 15:04:05")
+
+		id, err := userRegistrar.SaveUser(ctx, req.Login, hashedPassword, date_registered)
 		if err != nil {
 			log.Error("failed to save user", sl.Err(err))
 

@@ -62,13 +62,13 @@ func (s *Storage) GetPassword(ctx context.Context, login string) (string, error)
 }
 
 // SaveUser сохраняет пользователя и его зашифрованный пароль
-func (s *Storage) SaveUser(ctx context.Context, login string, password string) (int64, error) {
+func (s *Storage) SaveUser(ctx context.Context, login string, password string, date_registered string) (int64, error) {
 	const fnSaveUser = "storage.sqlite.SaveUser"
 
 	q := `
-		INSERT INTO users(login, password) VALUES(?, ?)
+		INSERT INTO users(login, password, date_registered) VALUES(?, ?, ?)
 	`
-	data := []any{login, password}
+	data := []any{login, password, date_registered}
 
 	res, err := s.db.ExecContext(ctx, q, data...)
 	if err != nil {
@@ -83,26 +83,18 @@ func (s *Storage) SaveUser(ctx context.Context, login string, password string) (
 	return id, nil
 }
 
-// SavePost сохраняет пост пользователя
-func (s *Storage) SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error) {
-	const fnSavePost = "storage.sqlite.SavePost"
+func (s *Storage) IsPostExist(ctx context.Context, id int) (bool, error) {
+	const fnIsPostExist = "storage.sqlite.IsUserExist"
 
-	q := `
-        INSERT INTO posts(created_by, title, text, date_created, date_updated) VALUES(?,?,?,?,?)`
+	q := `SELECT COUNT(*) FROM posts WHERE id = ?`
 
-	data := []any{created_by, title, text, date_created, date_created}
+	var count int
 
-	res, err := s.db.ExecContext(ctx, q, data...)
-	if err != nil {
-		return 0, fmt.Errorf("%s: failed to save post: %w", fnSavePost, err)
+	if err := s.db.QueryRowContext(ctx, q, &id).Scan(&count); err != nil {
+		return false, fmt.Errorf("%s: failed to check if post exists: %w", fnIsPostExist, err)
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("%s: failed to get last insert post's id: %w", fnSavePost, err)
-	}
-
-	return id, nil
+	return count > 0, nil
 }
 
 // GetPostCreator получает id создателя поста
@@ -128,11 +120,9 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	const fnGetPosts = "storage.sqlite.GetPosts"
 
 	q := `
-		SELECT posts.id, created_by, title, text, date_created, date_updated FROM posts
-		JOIN users
-			ON users.login = posts.created_by
+		SELECT posts.id, created_by, title, text, likes, date_created, date_updated FROM posts 
 		WHERE created_by = ?
-		ORDER BY posts.id desc`
+		ORDER BY posts.date_created desc`
 
 	rows, err := s.db.QueryContext(ctx, q, created_by)
 	if err != nil {
@@ -143,7 +133,7 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	posts := make([]types.Post, 0)
 	for rows.Next() {
 		var post types.Post
-		if err := rows.Scan(&post.ID, &post.Created_by, &post.Title, &post.Text, &post.Created_at, &post.Updated_at); err != nil {
+		if err := rows.Scan(&post.ID, &post.Created_by, &post.Title, &post.Text, &post.Likes, &post.Created_at, &post.Updated_at); err != nil {
 			return nil, fmt.Errorf("%s: failed to scan %s's posts: %w", fnGetPosts, created_by, err)
 		}
 		posts = append(posts, post)
@@ -152,6 +142,28 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	UserPosts := types.UsersPosts{Posts: posts}
 
 	return &UserPosts, nil
+}
+
+// SavePost сохраняет пост пользователя
+func (s *Storage) SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error) {
+	const fnSavePost = "storage.sqlite.SavePost"
+
+	q := `
+        INSERT INTO posts(created_by, title, text, date_created, date_updated) VALUES(?,?,?,?,?)`
+
+	data := []any{created_by, title, text, date_created, date_created}
+
+	res, err := s.db.ExecContext(ctx, q, data...)
+	if err != nil {
+		return 0, fmt.Errorf("%s: failed to save post: %w", fnSavePost, err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("%s: failed to get last insert post's id: %w", fnSavePost, err)
+	}
+
+	return id, nil
 }
 
 // UpdatePostTitle обновляет название поста
@@ -208,6 +220,61 @@ func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	return nil
 }
 
+func (s *Storage) IsPostLikedByUser(ctx context.Context, id int, liked_by string) (bool, error) {
+	const fnIsPostLikedByUser = "storage.sqlite.IsPostLikedByUser"
+
+	q := `SELECT COUNT(*) FROM reactions WHERE post_id = ? AND liked_by = ?`
+
+	var count int
+
+	if err := s.db.QueryRowContext(ctx, q, &id, &liked_by).Scan(&count); err != nil {
+		return false, fmt.Errorf("%s: failed to check if user exists: %w", fnIsPostLikedByUser, err)
+	}
+
+	return count > 0, nil
+}
+
+func (s *Storage) LikePost(ctx context.Context, id int, liked_by string) error {
+	const fnLikePost = "storage.sqlite.LikePost"
+
+	q := `UPDATE posts SET likes = likes + 1 WHERE id = ?`
+
+	_, err := s.db.ExecContext(ctx, q, id)
+	if err != nil {
+		return fmt.Errorf("%s: failed to increase post's likes: %w", fnLikePost, err)
+	}
+
+	q = `INSERT INTO reactions (post_id, liked_by) VALUES(?, ?)`
+
+	_, err = s.db.ExecContext(ctx, q, id, liked_by)
+	if err != nil {
+		return fmt.Errorf("%s: failed to save %s's like on post: %w", fnLikePost, liked_by, err)
+	}
+
+	return nil
+
+}
+
+func (s *Storage) UnlikePost(ctx context.Context, id int, liked_by string) error {
+	const fnUnlikePost = "storage.sqlite.UnlikePost"
+
+	q := `UPDATE posts SET likes = likes - 1 WHERE id = ?`
+
+	_, err := s.db.ExecContext(ctx, q, id)
+	if err != nil {
+		return fmt.Errorf("%s: failed to decrease post's likes: %w", fnUnlikePost, err)
+	}
+
+	q = `DELETE FROM reactions WHERE post_id = ? AND liked_by = ?`
+
+	_, err = s.db.ExecContext(ctx, q, id, liked_by)
+	if err != nil {
+		return fmt.Errorf("%s: failed to delete %s's like on post: %w", fnUnlikePost, liked_by, err)
+	}
+
+	return nil
+}
+
 // Init создает таблицы и индексы, если они еще не были созданы
 func (s *Storage) Init(ctx context.Context) error {
 	const fnInit = "storage.sqlite.Init"
@@ -216,7 +283,8 @@ func (s *Storage) Init(ctx context.Context) error {
 		CREATE TABLE IF NOT EXISTS users(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			login VARCHAR(50) NOT NULL, 
-			password VARCHAR(143) NOT NULL);
+			password VARCHAR(143) NOT NULL,
+			date_registered TIMESTAMP NOT NULL);
 
 		CREATE INDEX IF NOT EXISTS idx_login ON users(login);
 		
@@ -224,10 +292,18 @@ func (s *Storage) Init(ctx context.Context) error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			created_by VARCHAR(50) NOT NULL, 
 			title VARCHAR(100) NOT NULL,
-			text TEXT NOT NULL, 
+			text TEXT NOT NULL,
+			likes INTEGER DEFAULT 0, 
 			date_created TIMESTAMP NOT NULL, 
 			date_updated TIMESTAMP NOT NULL,
 			FOREIGN KEY(created_by) REFERENCES users(login) ON DELETE CASCADE);
+
+		CREATE TABLE IF NOT EXISTS reactions(
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			post_id INTEGER NOT NULL,
+			liked_by VARCHAR(50), 
+			FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE);
+		
 	`
 
 	_, err := s.db.ExecContext(ctx, q)
