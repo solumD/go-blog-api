@@ -1,4 +1,4 @@
-package remove
+package update
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -15,21 +16,24 @@ import (
 )
 
 type Request struct {
-	ID int `json:"id"`
+	ID    int    `json:"id"`
+	Title string `json:"title,omitempty"`
+	Text  string `json:"text,omitempty"`
 }
 
 type Response struct {
 	resp.Response
 }
 
-type PostRemover interface {
+type PostUpdater interface {
 	GetPostCreator(ctx context.Context, id int) (string, error)
-	RemovePost(ctx context.Context, id int) error
+	UpdatePostTitle(ctx context.Context, id int, title string, date_updated string) error
+	UpdatePostText(ctx context.Context, id int, text string, date_updated string) error
 }
 
-func New(ctx context.Context, log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, PostUpdater PostUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const fn = "handlers.post.remove.New"
+		const fn = "handlers.post.update.New"
 
 		log = log.With(
 			slog.String("fn", fn),
@@ -51,9 +55,20 @@ func New(ctx context.Context, log *slog.Logger, postRemover PostRemover) http.Ha
 			return
 		}
 
+		req.Title = strings.TrimSpace(req.Title)
+		req.Text = strings.TrimSpace(req.Text)
 		log.Info("request body decoded", slog.Any("request", req))
 
-		created_by, err := postRemover.GetPostCreator(ctx, req.ID)
+		if len(req.Text) == 0 && len(req.Title) == 0 {
+			log.Error("invalid request", sl.Err(fmt.Errorf("title or text must be filled in")))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, resp.Error("title or text must be filled in"))
+
+			return
+		}
+
+		created_by, err := PostUpdater.GetPostCreator(ctx, req.ID)
 		if err == sql.ErrNoRows {
 			log.Error("invalid request", sl.Err(fmt.Errorf("post doesn't exist: %d", req.ID)))
 
@@ -80,17 +95,33 @@ func New(ctx context.Context, log *slog.Logger, postRemover PostRemover) http.Ha
 			return
 		}
 
-		err = postRemover.RemovePost(ctx, req.ID)
-		if err != nil {
-			log.Error("failed to remove post", sl.Err(err))
+		date_updated := time.Now().Format("2006-01-02 15:04:05")
 
-			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("failed to remove post"))
+		if len(req.Title) > 0 {
+			err := PostUpdater.UpdatePostTitle(ctx, req.ID, req.Title, date_updated)
+			if err != nil {
+				log.Error("failed to update post title", sl.Err(err))
 
-			return
+				render.Status(r, http.StatusInternalServerError)
+				render.JSON(w, r, resp.Error("failed to update post title"))
+
+				return
+			}
 		}
 
-		log.Info("post removed", slog.Int("id", req.ID))
+		if len(req.Text) > 0 {
+			err := PostUpdater.UpdatePostText(ctx, req.ID, req.Text, date_updated)
+			if err != nil {
+				log.Error("failed to update post text", sl.Err(err))
+
+				render.Status(r, http.StatusInternalServerError)
+				render.JSON(w, r, resp.Error("failed to update post text"))
+
+				return
+			}
+		}
+
+		log.Info("post updated", slog.Int("id", req.ID))
 
 		render.JSON(w, r, Response{
 			Response: resp.OK(),

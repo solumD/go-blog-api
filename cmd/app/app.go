@@ -12,6 +12,7 @@ import (
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/remove"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/save"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/update"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/login"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/register"
 	mwAuth "github.com/solumD/go-blog-api/internal/http-server/middleware/auth"
@@ -66,6 +67,7 @@ func main() {
 		r.Use(mwAuth.New(cfg.TokenSecret, log))
 		r.Post("/create", save.New(context.Background(), log, storage))
 		r.Delete("/delete", remove.New(context.Background(), log, storage))
+		r.Patch("/update", update.New(context.Background(), log, storage))
 	})
 
 	// обработчики, связанные с пользователями

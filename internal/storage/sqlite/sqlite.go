@@ -127,14 +127,14 @@ func (s *Storage) GetPostCreator(ctx context.Context, id int) (string, error) {
 func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error) {
 	const fnGetPosts = "storage.sqlite.GetPosts"
 
-	query := `
+	q := `
 		SELECT posts.id, created_by, title, text, date_created, date_updated FROM posts
 		JOIN users
 			ON users.login = posts.created_by
 		WHERE created_by = ?
 		ORDER BY posts.id desc`
 
-	rows, err := s.db.QueryContext(ctx, query, created_by)
+	rows, err := s.db.QueryContext(ctx, q, created_by)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to get %s's posts: %w", fnGetPosts, created_by, err)
 	}
@@ -154,13 +154,53 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	return &UserPosts, nil
 }
 
+// UpdatePostTitle обновляет название поста
+func (s *Storage) UpdatePostTitle(ctx context.Context, id int, title string, date_updated string) error {
+	const fnUpdatePostTitle = "storage.sqlite.UpdatePostTitle"
+
+	q := `UPDATE posts SET 
+				title = ?,
+				date_updated = ?
+			  WHERE id = ?
+
+					`
+	data := []any{title, date_updated, id}
+
+	_, err := s.db.ExecContext(ctx, q, data...)
+	if err != nil {
+		return fmt.Errorf("%s: failed to save post: %w", fnUpdatePostTitle, err)
+	}
+
+	return nil
+}
+
+// UpdatePostTest обновляет текст поста
+func (s *Storage) UpdatePostText(ctx context.Context, id int, text string, date_updated string) error {
+	const fnUpdatePostText = "storage.sqlite.UpdatePostText"
+
+	q := `UPDATE posts SET 
+				text = ?,
+				date_updated = ?
+			  WHERE id = ?
+
+					`
+	data := []any{text, date_updated, id}
+
+	_, err := s.db.ExecContext(ctx, q, data...)
+	if err != nil {
+		return fmt.Errorf("%s: failed to save post: %w", fnUpdatePostText, err)
+	}
+
+	return nil
+}
+
 // RemovePost удаляет пост
 func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	const fnRemovePost = "storage.sqlite.RemovePost"
 
-	query := `DELETE FROM posts WHERE id = ?`
+	q := `DELETE FROM posts WHERE id = ?`
 
-	_, err := s.db.ExecContext(ctx, query, id)
+	_, err := s.db.ExecContext(ctx, q, id)
 	if err != nil {
 		return fmt.Errorf("%s: failed to delete post: %w", fnRemovePost, err)
 	}
