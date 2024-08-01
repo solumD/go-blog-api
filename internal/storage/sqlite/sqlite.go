@@ -13,7 +13,7 @@ type Storage struct {
 	db *sql.DB
 }
 
-// New создает новое sqlite хранилище
+// New создает новое sqlite хранилище.
 func New(path string) (*Storage, error) {
 	const fnNew = "storage.sqlite.New"
 
@@ -30,7 +30,7 @@ func New(path string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-// IsUserExist проверяет, есть ли в БД пользователь с указанным логином
+// IsUserExist проверяет, есть ли в БД пользователь с указанным логином.
 func (s *Storage) IsUserExist(ctx context.Context, login string) (bool, error) {
 	const fnIsUserExist = "storage.sqlite.IsUserExist"
 
@@ -45,7 +45,7 @@ func (s *Storage) IsUserExist(ctx context.Context, login string) (bool, error) {
 	return count > 0, nil
 }
 
-// GetPassword получает пароль конкретного пользователя
+// GetPassword получает захэшированный пароль пользователя.
 func (s *Storage) GetPassword(ctx context.Context, login string) (string, error) {
 	const fnGetPassword = "storage.sqlite.GetUserPassword"
 
@@ -61,7 +61,7 @@ func (s *Storage) GetPassword(ctx context.Context, login string) (string, error)
 	return password, nil
 }
 
-// SaveUser сохраняет пользователя и его зашифрованный пароль
+// SaveUser сохраняет пользователя и его захэшированный пароль.
 func (s *Storage) SaveUser(ctx context.Context, login string, password string, date_registered string) (int64, error) {
 	const fnSaveUser = "storage.sqlite.SaveUser"
 
@@ -83,6 +83,7 @@ func (s *Storage) SaveUser(ctx context.Context, login string, password string, d
 	return id, nil
 }
 
+// IsPostExist проверяет, существует ли пост.
 func (s *Storage) IsPostExist(ctx context.Context, id int) (bool, error) {
 	const fnIsPostExist = "storage.sqlite.IsUserExist"
 
@@ -97,7 +98,7 @@ func (s *Storage) IsPostExist(ctx context.Context, id int) (bool, error) {
 	return count > 0, nil
 }
 
-// GetPostCreator получает id создателя поста
+// GetPostCreator получает id создателя поста.
 func (s *Storage) GetPostCreator(ctx context.Context, id int) (string, error) {
 	const fnGetPostCreator = "storage.sqlite.GetPostCreator"
 
@@ -115,7 +116,7 @@ func (s *Storage) GetPostCreator(ctx context.Context, id int) (string, error) {
 	return created_by, nil
 }
 
-// GetPosts получает посты конкретного пользователя
+// GetPosts получает посты пользователя.
 func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error) {
 	const fnGetPosts = "storage.sqlite.GetPosts"
 
@@ -130,12 +131,34 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	}
 	defer rows.Close()
 
-	posts := make([]types.Post, 0)
+	posts := make([]types.Post, 0, 5)
 	for rows.Next() {
 		var post types.Post
 		if err := rows.Scan(&post.ID, &post.Created_by, &post.Title, &post.Text, &post.Likes, &post.Created_at, &post.Updated_at); err != nil {
 			return nil, fmt.Errorf("%s: failed to scan %s's posts: %w", fnGetPosts, created_by, err)
 		}
+
+		if post.Likes > 0 {
+			qq := `SELECT liked_by FROM reactions WHERE post_id = ?
+			ORDER BY id`
+
+			postLikers := make([]string, 0, 5)
+
+			rr, err := s.db.QueryContext(ctx, qq, post.ID)
+			if err != nil {
+				return nil, fmt.Errorf("%s: failed to get post's likers: %w", fnGetPosts, err)
+			}
+
+			for rr.Next() {
+				var liker string
+				if err := rr.Scan(&liker); err != nil {
+					return nil, fmt.Errorf("%s: failed to scan post's likers: %w", fnGetPosts, err)
+				}
+				postLikers = append(postLikers, liker)
+			}
+			post.LikedBy = postLikers
+		}
+
 		posts = append(posts, post)
 	}
 
@@ -144,7 +167,7 @@ func (s *Storage) GetPosts(ctx context.Context, created_by string) (*types.Users
 	return &UserPosts, nil
 }
 
-// SavePost сохраняет пост пользователя
+// SavePost сохраняет пост пользователя.
 func (s *Storage) SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error) {
 	const fnSavePost = "storage.sqlite.SavePost"
 
@@ -166,7 +189,7 @@ func (s *Storage) SavePost(ctx context.Context, created_by string, title string,
 	return id, nil
 }
 
-// UpdatePostTitle обновляет название поста
+// UpdatePostTitle обновляет название поста.
 func (s *Storage) UpdatePostTitle(ctx context.Context, id int, title string, date_updated string) error {
 	const fnUpdatePostTitle = "storage.sqlite.UpdatePostTitle"
 
@@ -186,7 +209,7 @@ func (s *Storage) UpdatePostTitle(ctx context.Context, id int, title string, dat
 	return nil
 }
 
-// UpdatePostTest обновляет текст поста
+// UpdatePostTest обновляет текст поста.
 func (s *Storage) UpdatePostText(ctx context.Context, id int, text string, date_updated string) error {
 	const fnUpdatePostText = "storage.sqlite.UpdatePostText"
 
@@ -206,7 +229,7 @@ func (s *Storage) UpdatePostText(ctx context.Context, id int, text string, date_
 	return nil
 }
 
-// RemovePost удаляет пост
+// RemovePost удаляет пост.
 func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	const fnRemovePost = "storage.sqlite.RemovePost"
 
@@ -220,6 +243,7 @@ func (s *Storage) RemovePost(ctx context.Context, id int) error {
 	return nil
 }
 
+// IsPostLikedByUser проверяет, лайкал ли пользователь пост.
 func (s *Storage) IsPostLikedByUser(ctx context.Context, id int, liked_by string) (bool, error) {
 	const fnIsPostLikedByUser = "storage.sqlite.IsPostLikedByUser"
 
@@ -234,6 +258,7 @@ func (s *Storage) IsPostLikedByUser(ctx context.Context, id int, liked_by string
 	return count > 0, nil
 }
 
+// LikePost увеличивает счетчик лайков поста и сохраняет лайк от пользователя.
 func (s *Storage) LikePost(ctx context.Context, id int, liked_by string) error {
 	const fnLikePost = "storage.sqlite.LikePost"
 
@@ -255,6 +280,7 @@ func (s *Storage) LikePost(ctx context.Context, id int, liked_by string) error {
 
 }
 
+// UnlikePost уменьшает счетчик лайков поста и удаляет лайк от пользователя.
 func (s *Storage) UnlikePost(ctx context.Context, id int, liked_by string) error {
 	const fnUnlikePost = "storage.sqlite.UnlikePost"
 
@@ -275,7 +301,7 @@ func (s *Storage) UnlikePost(ctx context.Context, id int, liked_by string) error
 	return nil
 }
 
-// Init создает таблицы и индексы, если они еще не были созданы
+// Init создает таблицы и индексы, если они еще не были созданы.
 func (s *Storage) Init(ctx context.Context) error {
 	const fnInit = "storage.sqlite.Init"
 
