@@ -27,6 +27,17 @@ type PostsGetter interface {
 	GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error)
 }
 
+// @Summary Get posts
+
+// @Tags user
+// @Description get posts of a user
+// @ID get
+// @Accept json
+// @Produde json
+// @Param user paths string true "username of a user"
+// @Response {object} Response
+// @Router /user/{user} [get]
+
 func New(ctx context.Context, log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.posts.New"

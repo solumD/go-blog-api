@@ -29,6 +29,17 @@ const (
 	envProd  = "prod"
 )
 
+// @title Go Blog Api
+// @version 1.0
+// @description API of a social media
+
+// @host localhost:8081
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 
 	cfg := config.MustLoad()
@@ -76,8 +87,8 @@ func main() {
 
 	// обработчики, связанные с пользователями
 	router.Get("/user/{login}", posts.New(context.Background(), log, storage))
-	router.Post("/register", register.New(context.Background(), log, storage))
-	router.Post("/login", login.New(context.Background(), cfg.TokenSecret, log, storage))
+	router.Post("/auth/register", register.New(context.Background(), log, storage))
+	router.Post("/auth/login", login.New(context.Background(), cfg.TokenSecret, log, storage))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 

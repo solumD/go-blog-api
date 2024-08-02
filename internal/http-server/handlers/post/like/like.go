@@ -27,6 +27,17 @@ type PostLiker interface {
 	LikePost(ctx context.Context, id int, liked_by string) error
 }
 
+// @Summary Like
+// @Security ApiKeyAuth
+// @Tags post
+// @Description like post
+// @ID like
+// @Accept json
+// @Produde json
+// @Param input body Request true "id of post to be liked"
+// @Response {object} Response
+// @Router /post/like [put]
+
 func New(ctx context.Context, log *slog.Logger, postLiker PostLiker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.like.New"

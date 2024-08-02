@@ -45,9 +45,9 @@ ___
 
 ## Демонстрация эндпоинтов (Demonstration of endpoints) <a name="demo"></a> 
 
-#### /register - регистрация пользователя (user registration)
+#### /auth/register - регистрация пользователя (user registration)
 
-#### /login - авторизация пользователя (user authorisation)
+#### /auth/login - авторизация пользователя (user authorisation)
 
 #### /user/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
 
