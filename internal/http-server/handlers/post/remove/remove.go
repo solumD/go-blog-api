@@ -27,17 +27,15 @@ type PostRemover interface {
 	RemovePost(ctx context.Context, id int) error
 }
 
-// @Summary Delete
-// @Security ApiKeyAuth
-// @Tags post
+// @Summary     Delete
+// @Security    ApiKeyAuth
+// @Tags        post
 // @Description delete post
-// @ID delete
-// @Accept json
-// @Produde json
-// @Param input body Request true "id of a post to be deleted"
-// @Response {object} Response
-// @Router /post/delete [delete]
-
+// @ID          delete
+// @Accept      json
+// @Produde     json
+// @Param       input    body Request true "id of a post to be deleted"
+// @Router      /post/delete [delete]
 func New(ctx context.Context, log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.remove.New"

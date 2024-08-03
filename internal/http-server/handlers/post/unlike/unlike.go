@@ -27,17 +27,15 @@ type PostUnLiker interface {
 	UnlikePost(ctx context.Context, id int, liked_by string) error
 }
 
-// @Summary Unlike
-// @Security ApiKeyAuth
-// @Tags post
+// @Summary     Unlike
+// @Security    ApiKeyAuth
+// @Tags        post
 // @Description unlike post
-// @ID unlike
-// @Accept json
-// @Produde json
-// @Param input body Request true "id of post to be unliked"
-// @Response {object} Response
-// @Router /post/unlike [put]
-
+// @ID          unlike
+// @Accept      json
+// @Produde     json
+// @Param       input    body Request true "id of post to be unliked"
+// @Router      /post/unlike [put]
 func New(ctx context.Context, log *slog.Logger, postUnliker PostUnLiker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.unlike.New"

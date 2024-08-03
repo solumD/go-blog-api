@@ -31,17 +31,15 @@ type PostUpdater interface {
 	UpdatePostText(ctx context.Context, id int, text string, date_updated string) error
 }
 
-// @Summary Update
-// @Security ApiKeyAuth
-// @Tags post
+// @Summary     Update
+// @Security    ApiKeyAuth
+// @Tags        post
 // @Description update post
-// @ID update
-// @Accept json
-// @Produde json
-// @Param input body Request true "id of a post and info to be updated"
-// @Response {object} Response
-// @Router /post/update [patch]
-
+// @ID          update
+// @Accept      json
+// @Produde     json
+// @Param       input    body Request true "id of a post and info to be updated"
+// @Router      /post/update [patch]
 func New(ctx context.Context, log *slog.Logger, PostUpdater PostUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.update.New"

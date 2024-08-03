@@ -32,16 +32,14 @@ type UserAuthorizer interface {
 	GetPassword(ctx context.Context, login string) (string, error)
 }
 
-// @Summary Login
-// @Tags auth
+// @Summary     Login
+// @Tags        auth
 // @Description login
-// @ID login
-// @Accept json
-// @Produde json
-// @Param input body Request true "account info"
-// @Response {object} Response
-// @Router /login [post]
-
+// @ID          login
+// @Accept      json
+// @Produde     json
+// @Param       input    body Request true "account info"
+// @Router      /auth/login [post]
 func New(ctx context.Context, secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.login.New"

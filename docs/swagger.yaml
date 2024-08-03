@@ -1,0 +1,205 @@
+basePath: /
+definitions:
+  like.Request:
+    properties:
+      id:
+        type: integer
+    type: object
+  login.Request:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  register.Request:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  remove.Request:
+    properties:
+      id:
+        type: integer
+    type: object
+  save.Request:
+    properties:
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  unlike.Request:
+    properties:
+      id:
+        type: integer
+    type: object
+  update.Request:
+    properties:
+      id:
+        type: integer
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API of a social media
+  title: Go Blog Api
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: login
+      operationId: login
+      parameters:
+      - description: account info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/login.Request'
+      responses: {}
+      summary: Login
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: register
+      operationId: register
+      parameters:
+      - description: account info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/register.Request'
+      responses: {}
+      summary: Register
+      tags:
+      - auth
+  /post/create:
+    post:
+      consumes:
+      - application/json
+      description: create post
+      operationId: create
+      parameters:
+      - description: post info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/save.Request'
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Create
+      tags:
+      - post
+  /post/delete:
+    delete:
+      consumes:
+      - application/json
+      description: delete post
+      operationId: delete
+      parameters:
+      - description: id of a post to be deleted
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/remove.Request'
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Delete
+      tags:
+      - post
+  /post/like:
+    put:
+      consumes:
+      - application/json
+      description: like post
+      operationId: like
+      parameters:
+      - description: id of post to be liked
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/like.Request'
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Like
+      tags:
+      - post
+  /post/unlike:
+    put:
+      consumes:
+      - application/json
+      description: unlike post
+      operationId: unlike
+      parameters:
+      - description: id of post to be unliked
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/unlike.Request'
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Unlike
+      tags:
+      - post
+  /post/update:
+    patch:
+      consumes:
+      - application/json
+      description: update post
+      operationId: update
+      parameters:
+      - description: id of a post and info to be updated
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/update.Request'
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Update
+      tags:
+      - post
+  /user/{user}:
+    get:
+      consumes:
+      - application/json
+      description: get posts of a user
+      operationId: get
+      parameters:
+      - description: username of a user
+        in: path
+        name: user
+        required: true
+        type: string
+      responses: {}
+      summary: Get posts
+      tags:
+      - user
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

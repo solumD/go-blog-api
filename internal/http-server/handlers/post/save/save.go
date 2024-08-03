@@ -28,17 +28,15 @@ type PostSaver interface {
 	SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error)
 }
 
-// @Summary Create
-// @Security ApiKeyAuth
-// @Tags post
+// @Summary     Create
+// @Security    ApiKeyAuth
+// @Tags        post
 // @Description create post
-// @ID create
-// @Accept json
-// @Produde json
-// @Param input body Request true "post info"
-// @Response {object} Response
-// @Router /post/create [post]
-
+// @ID          create
+// @Accept      json
+// @Produde     json
+// @Param       input    body Request true "post info"
+// @Router      /post/create [post]
 func New(ctx context.Context, log *slog.Logger, postSaver PostSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.save.New"

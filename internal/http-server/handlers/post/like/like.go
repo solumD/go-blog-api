@@ -35,9 +35,7 @@ type PostLiker interface {
 // @Accept json
 // @Produde json
 // @Param input body Request true "id of post to be liked"
-// @Response {object} Response
 // @Router /post/like [put]
-
 func New(ctx context.Context, log *slog.Logger, postLiker PostLiker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.like.New"

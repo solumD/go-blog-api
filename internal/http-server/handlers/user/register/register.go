@@ -31,16 +31,14 @@ type UserRegistrar interface {
 	SaveUser(ctx context.Context, login string, password string, date_created string) (int64, error)
 }
 
-// @Summary Register
-// @Tags auth
+// @Summary     Register
+// @Tags        auth
 // @Description register
-// @ID register
-// @Accept json
-// @Produde json
-// @Param input body Request true "account info"
-// @Response {object} Response
-// @Router /register [post]
-
+// @ID          register
+// @Accept      json
+// @Produde     json
+// @Param       input    body Request true "account info"
+// @Router      /auth/register [post]
 func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.register.New"

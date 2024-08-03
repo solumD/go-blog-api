@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	_ "github.com/solumD/go-blog-api/docs"
 	"github.com/solumD/go-blog-api/internal/config"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/like"
 	"github.com/solumD/go-blog-api/internal/http-server/handlers/post/posts"
@@ -21,6 +22,7 @@ import (
 	mwLogger "github.com/solumD/go-blog-api/internal/http-server/middleware/logger"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	sqlite "github.com/solumD/go-blog-api/internal/storage/sqlite"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -29,13 +31,11 @@ const (
 	envProd  = "prod"
 )
 
-// @title Go Blog Api
-// @version 1.0
+// @title       Go Blog Api
+// @version     1.0
 // @description API of a social media
-
-// @host localhost:8081
+// @host     localhost:8081
 // @BasePath /
-
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
@@ -89,6 +89,10 @@ func main() {
 	router.Get("/user/{login}", posts.New(context.Background(), log, storage))
 	router.Post("/auth/register", register.New(context.Background(), log, storage))
 	router.Post("/auth/login", login.New(context.Background(), cfg.TokenSecret, log, storage))
+
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8081/swagger/doc.json"),
+	))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
