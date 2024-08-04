@@ -49,18 +49,159 @@ ___
 
 ## Эндпоинты (Endpoints) <a name="demo"></a> 
 
-#### /auth/register - регистрация пользователя (user registration)
+#### POST /auth/register - регистрация пользователя (user registration)
+ 
+##### Example Input: 
+```
+{
+    "login": "cool_user",
+    "password": "qwerty123"
+}
+```
 
-#### /auth/login - авторизация пользователя (user authorisation)
+##### Example Response: 
+```
+{
+    "status": "OK",
+    "id": 7
+} 
+```
 
-#### /user/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
+#### POST /auth/login - авторизация пользователя (user authorisation)
 
-#### /post/create - создать пост (create a post)
+##### Example Input: 
+```
+{
+    "login": "cool_user",
+    "password": "qwerty123"
+}
+```
 
-#### /post/update - обновить название или текст поста (update post's title or text)
+##### Example Response: 
+```
+{
+    "status": "OK",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI3ODA4OTIsInN1YiI6ImNvb2xfdXNlciJ9.n-c0YymZyImpDRCui4WLKmH25mzhdX2q_kTYyAIHpXE"
+}
+```
 
-#### /post/delete - удалить пост (delete a post)
+#### GET /user/{login} - получить все посты конкретного пользователя (get all posts of a particular user)
 
-#### /post/like - поставить лайк на пост (like post)
+##### Example Response: 
+```
+{
+    "status": "OK",
+    "posts": [
+        {
+            "id": 3,
+            "created_by": "prince123",
+            "title": "aaaaaaaa",
+            "text": "3333333333",
+            "likes": 2,
+            "liked_by": [
+                "prince123",
+                "solum123"
+            ],
+            "created_at": "2024-08-01T17:18:30Z",
+            "updated_at": "2024-08-01T17:20:49Z"
+        },
+        {
+            "id": 1,
+            "created_by": "prince123",
+            "title": "post1",
+            "text": "aaaaaaaa",
+            "likes": 2,
+            "liked_by": [
+                "prince123",
+                "testuser"
+            ],
+            "created_at": "2024-08-01T17:18:21Z",
+            "updated_at": "2024-08-01T17:20:55Z"
+        }
+    ]
+}
+```
 
-#### /post/unlike - убрать лайк с поста (unlike post)
+#### POST /post/create - создать пост (create a post)
+
+##### Example Input: 
+```
+{
+    "title": "very cool title",
+    "text": "very cool text"
+}
+```
+
+##### Example Response: 
+```
+{
+    "status": "OK",
+    "id": 6
+}
+```
+
+#### PATCH /post/update - обновить название или текст поста (update post's title or text)
+
+##### Example Input: 
+```
+{   
+    "id": 6,
+    "title": "new title",
+    "text": "new text"
+}
+```
+
+##### Example Response: 
+```
+{
+    "status": "OK"
+}
+```
+
+#### DELETE /post/delete - удалить пост (delete a post)
+
+##### Example Input: 
+```
+{   
+    "id": 6
+}
+```
+
+##### Example Response: 
+```
+{
+    "status": "OK"
+}
+```
+
+#### PUT /post/like - поставить лайк на пост (like post)
+
+##### Example Input: 
+```
+{   
+    "id": 3
+}
+```
+
+##### Example Response: 
+```
+{
+    "status": "OK"
+}
+```
+
+#### PUT /post/unlike - убрать лайк с поста (unlike post)
+
+##### Example Input: 
+```
+{   
+    "id": 3
+}
+```
+
+##### Example Response: 
+```
+{
+    "status": "OK"
+}
+```
