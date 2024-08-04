@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	"github.com/solumD/go-blog-api/internal/types"
@@ -27,13 +28,15 @@ type PostsGetter interface {
 	GetPosts(ctx context.Context, created_by string) (*types.UsersPosts, error)
 }
 
-// @Summary Get posts
+// @Summary     Get posts
 // @Tags        user
 // @Description get posts of a user
 // @ID          get
 // @Accept      json
 // @Produde     json
-// @Param       user     path string true "username of a user"
+// @Param       user    path     string true "username of a user"
+// @Success     200     {object} models.PostsSuccess
+// @Failure     400,500 {object} models.PostsError
 // @Router      /user/{user} [get]
 func New(ctx context.Context, log *slog.Logger, postsGetter PostsGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

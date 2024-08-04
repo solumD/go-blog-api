@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 )
@@ -27,15 +28,17 @@ type PostLiker interface {
 	LikePost(ctx context.Context, id int, liked_by string) error
 }
 
-// @Summary Like
-// @Security ApiKeyAuth
-// @Tags post
+// @Summary     Like
+// @Security    ApiKeyAuth
+// @Tags        post
 // @Description like post
-// @ID like
-// @Accept json
-// @Produde json
-// @Param input body Request true "id of post to be liked"
-// @Router /post/like [put]
+// @ID          like
+// @Accept      json
+// @Produde     json
+// @Param       input body     Request true "id of post to be liked"
+// @Success     200   {object} models.LikeSuccess
+// @Failure     400,500      {object} models.LikeError
+// @Router      /post/like [put]
 func New(ctx context.Context, log *slog.Logger, postLiker PostLiker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "handlers.post.like.New"

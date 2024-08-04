@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/jwt"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
@@ -38,7 +39,9 @@ type UserAuthorizer interface {
 // @ID          login
 // @Accept      json
 // @Produde     json
-// @Param       input    body Request true "account info"
+// @Param       input   body     Request true "account info"
+// @Success     200     {object} models.LoginSuccess
+// @Failure     400,500 {object} models.LoginError
 // @Router      /auth/login [post]
 func New(ctx context.Context, secret string, log *slog.Logger, userAuthorizer UserAuthorizer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

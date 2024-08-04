@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 )
@@ -34,7 +35,9 @@ type PostUnLiker interface {
 // @ID          unlike
 // @Accept      json
 // @Produde     json
-// @Param       input    body Request true "id of post to be unliked"
+// @Param       input   body     Request true "id of post to be unliked"
+// @Success     200     {object} models.UnlikeSuccess
+// @Failure     400,500 {object} models.UnlikeError
 // @Router      /post/unlike [put]
 func New(ctx context.Context, log *slog.Logger, postUnliker PostUnLiker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

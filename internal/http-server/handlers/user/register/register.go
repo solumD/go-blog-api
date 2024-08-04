@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 	"github.com/solumD/go-blog-api/internal/lib/password"
@@ -37,7 +38,9 @@ type UserRegistrar interface {
 // @ID          register
 // @Accept      json
 // @Produde     json
-// @Param       input    body Request true "account info"
+// @Param       input   body     Request true "account info"
+// @Success     200     {object} models.RegisterSuccess
+// @Failure     400,500 {object} models.RegisterError
 // @Router      /auth/register [post]
 func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

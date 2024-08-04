@@ -12,6 +12,114 @@ definitions:
       password:
         type: string
     type: object
+  models.DeleteError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.DeleteSuccess:
+    properties:
+      status:
+        type: string
+    type: object
+  models.LikeError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.LikeSuccess:
+    properties:
+      status:
+        type: string
+    type: object
+  models.LoginError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.LoginSuccess:
+    properties:
+      status:
+        type: string
+      token:
+        type: string
+    type: object
+  models.PostsError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.PostsSuccess:
+    properties:
+      message:
+        type: string
+      posts:
+        items:
+          $ref: '#/definitions/types.Post'
+        type: array
+      status:
+        type: string
+    type: object
+  models.RegisterError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.RegisterSuccess:
+    properties:
+      id:
+        type: integer
+      status:
+        type: string
+    type: object
+  models.SaveError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.SaveSuccess:
+    properties:
+      id:
+        type: integer
+      status:
+        type: string
+    type: object
+  models.UnlikeError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.UnlikeSuccess:
+    properties:
+      status:
+        type: string
+    type: object
+  models.UpdateError:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  models.UpdateSuccess:
+    properties:
+      status:
+        type: string
+    type: object
   register.Request:
     properties:
       login:
@@ -29,6 +137,27 @@ definitions:
       text:
         type: string
       title:
+        type: string
+    type: object
+  types.Post:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      id:
+        type: integer
+      liked_by:
+        items:
+          type: string
+        type: array
+      likes:
+        type: integer
+      text:
+        type: string
+      title:
+        type: string
+      updated_at:
         type: string
     type: object
   unlike.Request:
@@ -65,7 +194,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/login.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.LoginError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.LoginError'
       summary: Login
       tags:
       - auth
@@ -82,7 +223,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/register.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RegisterSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.RegisterError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.RegisterError'
       summary: Register
       tags:
       - auth
@@ -99,7 +252,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/save.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SaveSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.SaveError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.SaveError'
       security:
       - ApiKeyAuth: []
       summary: Create
@@ -118,7 +283,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/remove.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DeleteSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DeleteError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.DeleteError'
       security:
       - ApiKeyAuth: []
       summary: Delete
@@ -137,7 +314,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/like.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LikeSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.LikeError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.LikeError'
       security:
       - ApiKeyAuth: []
       summary: Like
@@ -156,7 +345,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/unlike.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UnlikeSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.UnlikeError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.UnlikeError'
       security:
       - ApiKeyAuth: []
       summary: Unlike
@@ -175,7 +376,19 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/update.Request'
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UpdateSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.UpdateError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.UpdateError'
       security:
       - ApiKeyAuth: []
       summary: Update
@@ -193,7 +406,19 @@ paths:
         name: user
         required: true
         type: string
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PostsSuccess'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.PostsError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.PostsError'
       summary: Get posts
       tags:
       - user

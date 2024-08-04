@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 )
@@ -34,7 +35,9 @@ type PostRemover interface {
 // @ID          delete
 // @Accept      json
 // @Produde     json
-// @Param       input    body Request true "id of a post to be deleted"
+// @Param       input   body     Request true "id of a post to be deleted"
+// @Success     200     {object} models.DeleteSuccess
+// @Failure     400,500 {object} models.DeleteError
 // @Router      /post/delete [delete]
 func New(ctx context.Context, log *slog.Logger, postRemover PostRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

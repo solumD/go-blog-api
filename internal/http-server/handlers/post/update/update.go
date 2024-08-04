@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	_ "github.com/solumD/go-blog-api/internal/http-server/models"
 	resp "github.com/solumD/go-blog-api/internal/lib/api/response"
 	"github.com/solumD/go-blog-api/internal/lib/logger/sl"
 )
@@ -38,7 +39,9 @@ type PostUpdater interface {
 // @ID          update
 // @Accept      json
 // @Produde     json
-// @Param       input    body Request true "id of a post and info to be updated"
+// @Param       input   body     Request true "id of a post and info to be updated"
+// @Success     200     {object} models.UpdateSuccess
+// @Failure     400,500 {object} models.UpdateError
 // @Router      /post/update [patch]
 func New(ctx context.Context, log *slog.Logger, PostUpdater PostUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
