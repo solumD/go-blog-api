@@ -3,7 +3,7 @@
 
 [English](#english)
 
-[Демонстрация эндпоинтов (Demonstration of endpoints)](#demo)
+[Эндпоинты (Endpoints)](#demo)
 ___
 ### RUS <a name="russian"></a> 
 Небольшое API блога. Пользователи могут добавлять, редактировать и удалять посты. Также есть возможность увидеть посты конкретного пользователя и поставить лайк на конкретный пост.
@@ -18,6 +18,8 @@ ___
 Хэширование пароля - [bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt);
 
 JWT-аутентификация - [jwt-go](https://pkg.go.dev/github.com/golang-jwt/jwt/v5);
+
+Документация - Swagger 2.0;
 
 Написан DOCKERFILE;
 
@@ -38,12 +40,14 @@ Password hashing - [bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt);
 
 JWT authentication - [jwt-go](https://pkg.go.dev/github.com/golang-jwt/jwt/v5);
 
+Documentation - Swagger 2.0;
+
 DOCKERFILE is written;
 
 Testing - standart library and [httpexpect](https://github.com/gavv/httpexpect).
 ___
 
-## Демонстрация эндпоинтов (Demonstration of endpoints) <a name="demo"></a> 
+## Эндпоинты (Endpoints) <a name="demo"></a> 
 
 #### /auth/register - регистрация пользователя (user registration)
 
