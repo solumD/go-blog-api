@@ -1,3 +1,4 @@
+// Dummy main file for swagger
 package main
 
 // @title                      Go Blog Api
