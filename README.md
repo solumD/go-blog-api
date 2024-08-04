@@ -174,7 +174,7 @@ ___
 }
 ```
 
-#### PUT /post/like - поставить лайк на пост (like post)
+#### PUT /post/like - поставить лайк на пост (like a post)
 
 ##### Example Input: 
 ```
@@ -190,7 +190,7 @@ ___
 }
 ```
 
-#### PUT /post/unlike - убрать лайк с поста (unlike post)
+#### PUT /post/unlike - убрать лайк с поста (unlike a post)
 
 ##### Example Input: 
 ```
