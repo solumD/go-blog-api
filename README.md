@@ -21,7 +21,7 @@ JWT-аутентификация - [jwt-go](https://pkg.go.dev/github.com/golang
 
 Документация - Swagger 2.0;
 
-Написан DOCKERFILE;
+Написан Dockerfile;
 
 Тестирование - стандартная библиотека и пакет [httpexpect](https://github.com/gavv/httpexpect).
 
@@ -42,7 +42,7 @@ JWT authentication - [jwt-go](https://pkg.go.dev/github.com/golang-jwt/jwt/v5);
 
 Documentation - Swagger 2.0;
 
-DOCKERFILE is written;
+Dockerfile is written;
 
 Testing - standart library and [httpexpect](https://github.com/gavv/httpexpect).
 ___
@@ -174,7 +174,7 @@ ___
 }
 ```
 
-#### PUT /post/like - поставить лайк на пост (like post)
+#### PUT /post/like - поставить лайк на пост (like a post)
 
 ##### Example Input: 
 ```
@@ -190,7 +190,7 @@ ___
 }
 ```
 
-#### PUT /post/unlike - убрать лайк с поста (unlike post)
+#### PUT /post/unlike - убрать лайк с поста (unlike a post)
 
 ##### Example Input: 
 ```
