@@ -7,7 +7,7 @@
 ___
 ### RUS <a name="russian"></a> 
 Небольшое API блога. Пользователи могут добавлять, редактировать и удалять посты. Также есть возможность увидеть посты конкретного пользователя и поставить лайк на конкретный пост.
-В данный момент пишу функциональные тесты.
+В данный момент пишу функциональные тесты и юнит-тесты.
 ## Использованные пакеты и технологии
 Роутер - [chi](https://github.com/go-chi/chi/);
 
@@ -23,12 +23,14 @@ JWT-аутентификация - [jwt-go](https://pkg.go.dev/github.com/golang
 
 Написан Dockerfile;
 
+Моки для тестов - [mockery](https://github.com/vektra/mockery);
+
 Тестирование - стандартная библиотека и пакет [httpexpect](https://github.com/gavv/httpexpect).
 
 ___
 ### ENG <a name="english"></a> 
 A small API of a blog. Users can add, update and delete posts. It is also possible to get the posts of a particular user and like a particular post.
-Currently I'm writing functional tests.
+Currently I'm writing functional tests and unit-tests.
 ## Packages and technologies used
 Router - [chi](https://github.com/go-chi/chi/);
 
@@ -43,6 +45,8 @@ JWT authentication - [jwt-go](https://pkg.go.dev/github.com/golang-jwt/jwt/v5);
 Documentation - Swagger 2.0;
 
 Dockerfile is written;
+
+Mocks - [mockery](https://github.com/vektra/mockery);
 
 Testing - standart library and [httpexpect](https://github.com/gavv/httpexpect).
 ___
