@@ -25,6 +25,7 @@ type Response struct {
 	ID int64 `json:"id,omitempty"`
 }
 
+//go:generate go run github.com/vektra/mockery/v2@v2.30.0 --name=PostSaver
 type PostSaver interface {
 	SavePost(ctx context.Context, created_by string, title string, text string, date_created string) (int64, error)
 }
@@ -83,10 +84,10 @@ func New(ctx context.Context, log *slog.Logger, postSaver PostSaver) http.Handle
 
 		id, err := postSaver.SavePost(ctx, login, req.Title, req.Text, date_created)
 		if err != nil {
-			log.Error("failed to create post", sl.Err(err))
+			log.Error("failed to save post", sl.Err(err))
 
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("failed to create post"))
+			render.JSON(w, r, resp.Error("failed to save post"))
 
 			return
 		}

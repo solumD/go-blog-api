@@ -28,14 +28,14 @@ func TestRegisterLoginCreateDelete(t *testing.T) {
 	l := gofakeit.Username()
 	p := gofakeit.Password(true, true, true, false, false, 10)
 
-	e.POST("/register").
+	e.POST("/auth/register").
 		WithJSON(register.Request{
 			Login:    l,
 			Password: p,
 		}).
 		Expect().Status(http.StatusOK)
 
-	r := e.POST("/login").
+	r := e.POST("/auth/login").
 		WithJSON(login.Request{
 			Login:    l,
 			Password: p,
@@ -78,14 +78,14 @@ func TestRegisterUserAlreadyExists(t *testing.T) {
 	l := gofakeit.Username()
 	p := gofakeit.Password(true, true, true, false, false, 10)
 
-	e.POST("/register").
+	e.POST("/auth/register").
 		WithJSON(register.Request{
 			Login:    l,
 			Password: p,
 		}).
 		Expect().Status(http.StatusOK)
 
-	r := e.POST("/register").
+	r := e.POST("/auth/register").
 		WithJSON(register.Request{
 			Login:    l,
 			Password: p,
@@ -141,7 +141,7 @@ func TestRegisterInvalidLoginOrPassword(t *testing.T) {
 
 			e := httpexpect.Default(t, u.String())
 
-			r := e.POST("/register").
+			r := e.POST("/auth/register").
 				WithJSON(register.Request{
 					Login:    tc.login,
 					Password: tc.password,
