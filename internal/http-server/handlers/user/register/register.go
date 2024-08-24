@@ -27,6 +27,7 @@ type Response struct {
 	ID int64 `json:"id,omitempty"`
 }
 
+//go:generate go run github.com/vektra/mockery/v2@v2.30.0 --name=UserRegistrar
 type UserRegistrar interface {
 	IsUserExist(ctx context.Context, login string) (bool, error)
 	SaveUser(ctx context.Context, login string, password string, date_created string) (int64, error)
@@ -79,6 +80,15 @@ func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) htt
 			return
 		}
 
+		if err := validator.ValidatePassword(req.Password); err != nil {
+			log.Error("invalid request", sl.Err(err))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, resp.Error(err.Error()))
+
+			return
+		}
+
 		// проверяем, существует ли пользователь с логином, переданным в запросе
 		exist, err := userRegistrar.IsUserExist(ctx, req.Login)
 		if err != nil {
@@ -95,15 +105,6 @@ func New(ctx context.Context, log *slog.Logger, userRegistrar UserRegistrar) htt
 
 			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("user already exists"))
-
-			return
-		}
-
-		if err := validator.ValidatePassword(req.Password); err != nil {
-			log.Error("invalid request", sl.Err(err))
-
-			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
 		}

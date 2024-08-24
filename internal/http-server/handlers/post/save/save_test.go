@@ -74,7 +74,7 @@ func TestSavePostHandler(t *testing.T) {
 
 			input := fmt.Sprintf(`{"title": "%s", "text": "%s"}`, tc.title, tc.text)
 
-			req, err := http.NewRequest(http.MethodPost, "/save", bytes.NewReader([]byte(input)))
+			req, err := http.NewRequest(http.MethodPost, "/post/save", bytes.NewReader([]byte(input)))
 			require.NoError(t, err)
 
 			req.Header.Add("login", "test_user")
