@@ -28,6 +28,7 @@ type Response struct {
 	Token string `json:"token,omitempty"`
 }
 
+//go:generate go run github.com/vektra/mockery/v2@v2.30.0 --name=UserAuthorizer
 type UserAuthorizer interface {
 	IsUserExist(ctx context.Context, login string) (bool, error)
 	GetPassword(ctx context.Context, login string) (string, error)
@@ -80,6 +81,15 @@ func New(ctx context.Context, secret string, log *slog.Logger, userAuthorizer Us
 			return
 		}
 
+		if err := validator.ValidatePassword(req.Password); err != nil {
+			log.Error("invalid request", sl.Err(err))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, resp.Error(err.Error()))
+
+			return
+		}
+
 		// проверяем, существует ли пользователь с логином, переданным в запросе
 		exist, err := userAuthorizer.IsUserExist(ctx, req.Login)
 		if err != nil {
@@ -96,15 +106,6 @@ func New(ctx context.Context, secret string, log *slog.Logger, userAuthorizer Us
 
 			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("user does not exist"))
-
-			return
-		}
-
-		if err := validator.ValidatePassword(req.Password); err != nil {
-			log.Error("invalid request", sl.Err(err))
-
-			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error(err.Error()))
 
 			return
 		}

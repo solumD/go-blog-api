@@ -1,4 +1,4 @@
-package register_test
+package login_test
 
 import (
 	"bytes"
@@ -10,28 +10,31 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/register"
-	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/register/mocks"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/login"
+	"github.com/solumD/go-blog-api/internal/http-server/handlers/user/login/mocks"
 	"github.com/solumD/go-blog-api/internal/lib/logger/loggerdiscard"
+	"github.com/solumD/go-blog-api/internal/lib/password"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRegisterHandler(t *testing.T) {
+func TestLoginHandler(t *testing.T) {
 	testcases := []struct {
 		name                 string
 		login                string
 		password             string
+		realPassword         string
 		respError            string
-		mockSaveError        error
+		mockGetPasswordError error
 		mockIsUserExistError error
 		statusCode           int
 	}{
 		{
-			name:       "Success",
-			login:      "VeryCoolLogin",
-			password:   "VeryCoolPassword",
-			statusCode: http.StatusOK,
+			name:         "Success",
+			login:        "VeryCoolLogin",
+			password:     "VeryCoolPassword",
+			realPassword: "VeryCoolPassword",
+			statusCode:   http.StatusOK,
 		},
 		{
 			name:       "Short login",
@@ -62,12 +65,12 @@ func TestRegisterHandler(t *testing.T) {
 			statusCode: http.StatusBadRequest,
 		},
 		{
-			name:          "SaveUser Error",
-			login:         "VeryCoolLogin",
-			password:      "VeryCoolPassword",
-			respError:     "failed to save user",
-			mockSaveError: errors.New("unexpected error"),
-			statusCode:    http.StatusInternalServerError,
+			name:                 "GetPassword Error",
+			login:                "VeryCoolLogin",
+			password:             "VeryCoolPassword",
+			respError:            "failed to get user's real password",
+			mockGetPasswordError: errors.New("unexpected error"),
+			statusCode:           http.StatusInternalServerError,
 		},
 		{
 			name:                 "IsUserExist Error",
@@ -78,11 +81,19 @@ func TestRegisterHandler(t *testing.T) {
 			statusCode:           http.StatusInternalServerError,
 		},
 		{
-			name:       "User already exists",
+			name:       "User does not exist",
 			login:      "VeryCoolLogin",
 			password:   "VeryCoolPassword",
-			respError:  "user already exists",
+			respError:  "user does not exist",
 			statusCode: http.StatusBadRequest,
+		},
+		{
+			name:         "Passwords doesn't match",
+			login:        "VeryCoolLogin",
+			password:     "VeryCoolPassword",
+			realPassword: "AnotherPassword",
+			respError:    "invalid password",
+			statusCode:   http.StatusBadRequest,
 		},
 	}
 
@@ -92,28 +103,31 @@ func TestRegisterHandler(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			userRegistrarMock := mocks.NewUserRegistrar(t)
+			userAuthorizerMock := mocks.NewUserAuthorizer(t)
 
-			if tc.respError == "" || tc.mockSaveError != nil {
-				userRegistrarMock.On("SaveUser", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).
-					Return(int64(1), tc.mockSaveError).
-					Once()
-				userRegistrarMock.On("IsUserExist", mock.Anything, mock.AnythingOfType("string")).
-					Return(false, nil).
-					Once()
-			}
+			hashedrealPassword, err := password.EncryptPassword(tc.realPassword)
+			require.NoError(t, err)
 
-			if tc.respError == "user already exists" || tc.mockIsUserExistError != nil {
-				userRegistrarMock.On("IsUserExist", mock.Anything, mock.AnythingOfType("string")).
-					Return(true, tc.mockIsUserExistError).
+			if tc.respError == "" || tc.respError == "invalid password" || tc.mockGetPasswordError != nil {
+				userAuthorizerMock.On("GetPassword", mock.Anything, mock.AnythingOfType("string")).
+					Return(hashedrealPassword, tc.mockGetPasswordError).
+					Once()
+				userAuthorizerMock.On("IsUserExist", mock.Anything, mock.AnythingOfType("string")).
+					Return(true, nil).
 					Once()
 			}
 
-			handler := register.New(context.Background(), loggerdiscard.NewDiscardLogger(), userRegistrarMock)
+			if tc.respError == "user does not exist" || tc.mockIsUserExistError != nil {
+				userAuthorizerMock.On("IsUserExist", mock.Anything, mock.AnythingOfType("string")).
+					Return(false, tc.mockIsUserExistError).
+					Once()
+			}
+
+			handler := login.New(context.Background(), "secret", loggerdiscard.NewDiscardLogger(), userAuthorizerMock)
 
 			input := fmt.Sprintf(`{"login": "%s", "password": "%s"}`, tc.login, tc.password)
 
-			req, err := http.NewRequest(http.MethodPost, "/user/register", bytes.NewReader([]byte(input)))
+			req, err := http.NewRequest(http.MethodPost, "/user/login", bytes.NewReader([]byte(input)))
 			require.NoError(t, err)
 
 			recorder := httptest.NewRecorder()
@@ -123,7 +137,7 @@ func TestRegisterHandler(t *testing.T) {
 
 			body := recorder.Body.String()
 
-			var resp register.Response
+			var resp login.Response
 
 			require.NoError(t, json.Unmarshal([]byte(body), &resp))
 
